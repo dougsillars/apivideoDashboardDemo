@@ -39,10 +39,12 @@ var validator = require("email-validator");
 var fs = require('fs');
 //apivideo
 const apiVideo = require('@api.video/nodejs-sdk');
-//set up api.video client with my production key
-//I keep my key in a .env file to keep it private.
-//if you have a .env file, make sure you add it to your .gitignore file
-var client = new apiVideo.Client({ apiKey: process.env.apivideoKeyProd});
+var apiVideoSandbox="";
+var apiVideoProduction = "";
+var sandboxOrProd="sandbox";
+
+//initially sandbox only
+var client = new apiVideo.Client({ apiKey: apiVideoSandbox});
 
 
 
@@ -55,6 +57,14 @@ app.get('/', (req, res) => {
 	var remoteIp = req.ip;
 	console.log("get index loaded", remoteIp);
 	var live = req.query.live;
+	console.log("apiVideoSandbox before", apiVideoSandbox);
+	if(req.query.sandbox){
+		apiVideoSandbox = req.query.sandbox;
+	}
+	apiVideoProduction = req.query.prod;
+	//Just sandbox right now
+	console.log("apiVideoSandbox after", apiVideoSandbox);
+	client = new apiVideo.Client({ apiKey: apiVideoSandbox});
 	if(live){
 		//we have to add a livestream!
 		console.log("live!");
@@ -68,6 +78,22 @@ app.get('/', (req, res) => {
 		});
 		//set up a  RTMP server from the list
 		//list of streams from api.video
+		//todo - see if there are livestreams already created with the name DashboardLive
+		
+		let liveStream = client.lives.create('DashboardLive');
+		liveStream.then(function(streams){
+			console.log("streams",streams);
+			
+			var streamId;
+			var streamKey;
+			
+			streamKey = streams.streamKey;
+			streamId = streams.liveStreamId;
+			rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
+			console.log("rtmp endpoint",rtmpEndpoint );
+		
+		//this is for the webpage version
+		/*
 		let streamList = client.lives.search();	
 		streamList.then(function(streams) {
 			
@@ -90,6 +116,7 @@ app.get('/', (req, res) => {
 				rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
 				console.log("rtmp endpoint",rtmpEndpoint );
 			}
+			*/
 			//we've esablished the stream, we want to use, so connect the id with the bas url
 			var streamUrl = "https://live.api.video/" + streamId;
 			
@@ -97,10 +124,10 @@ app.get('/', (req, res) => {
 		    liveStreamManifest = streamUrl+".m3u8";
 			//
 			//api response says "broadcasting:false". let's fix that
-			streams[chosenStream].broadcasting = true;
+			streams.broadcasting = true;
 			
 			//the API response needs to be a string
-			var  liveResponse = JSON.stringify(streams[chosenStream],null, 2);
+			var  liveResponse = JSON.stringify(streams,null, 2);
 			//in addition to sending the API response, we should havea. placeholder message while the video buffersup
 			var  videoResponse = "Your Livestream will start in a few seconds..."
 			
@@ -133,7 +160,7 @@ app.get('/', (req, res) => {
 //the form posts the data to the same location
 //so now we'll deal with the submitted data
 app.post('/', (req,res) =>{
-	
+	console.log("apiVideoSandbox", apiVideoSandbox);
     //formidable reads the form
 	var form = new formidable.IncomingForm({maxFileSize : 2000 * 1024 * 1024}); //2 Gb
 	//console.log("form",form);
@@ -152,7 +179,8 @@ app.post('/', (req,res) =>{
 	//testing - writing fields and info on the file to the log
    // console.log('Fields', fields);
   //  console.log('Files', files.source);
-	
+  //Just sandbox right now
+
 	var date = new Date();
 	var videoTitle = date.getTime();
 	//uploading.  Timers are for a TODO measuring upload & parsing time

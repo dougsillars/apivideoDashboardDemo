@@ -57,13 +57,11 @@ app.get('/', (req, res) => {
 	var remoteIp = req.ip;
 	console.log("get index loaded", remoteIp);
 	var live = req.query.live;
-	console.log("apiVideoSandbox before", apiVideoSandbox);
 	if(req.query.sandbox){
 		apiVideoSandbox = req.query.sandbox;
 	}
 	apiVideoProduction = req.query.prod;
 	//Just sandbox right now
-	console.log("apiVideoSandbox after", apiVideoSandbox);
 	client = new apiVideo.Client({ apiKey: apiVideoSandbox});
 	if(live){
 		//we have to add a livestream!
@@ -78,20 +76,29 @@ app.get('/', (req, res) => {
 		});
 		//set up a  RTMP server from the list
 		//list of streams from api.video
-		//todo - see if there are livestreams already created with the name DashboardLive
-		
-		let liveStream = client.lives.create('DashboardLive');
-		liveStream.then(function(streams){
-			console.log("streams",streams);
+		//see if there are livestreams already created with the name DashboardLive
+        let streamList = client.lives.search({name:"DashboardLive"});	
+			//there will eitehr be one.. or not.
+			streamList.then(function(streams) {
+				if(streams.length >0 ){
+					console.log("found existing livestream", streams);
+					// run function to return stream
+					publishLiveStream(streams);
 			
-			var streamId;
-			var streamKey;
-			
-			streamKey = streams.streamKey;
-			streamId = streams.liveStreamId;
-			rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
-			console.log("rtmp endpoint",rtmpEndpoint );
-		
+				}else{
+					let newStream = client.lives.create('DashboardLive');
+					newStream.then(function(streams){
+						console.log("creating new livestream", streams);
+						// run function to return stream
+						publishLiveStream(streams);
+					});
+				}
+
+	
+			});	
+				
+
+		/*
 		//this is for the webpage version
 		/*
 		let streamList = client.lives.search();	
@@ -116,7 +123,7 @@ app.get('/', (req, res) => {
 				rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
 				console.log("rtmp endpoint",rtmpEndpoint );
 			}
-			*/
+			
 			//we've esablished the stream, we want to use, so connect the id with the bas url
 			var streamUrl = "https://live.api.video/" + streamId;
 			
@@ -142,8 +149,40 @@ app.get('/', (req, res) => {
            				
 			return res.render('index', {iframecode, videoResponse, rtmpEndpoint, liveStreamManifest, liveResponse});   	 		
 
-		});
-		
+	//	});
+		*/
+			function publishLiveStream(streams){
+				console.log(streams);	
+			  var streamId;
+			  var streamKey;
+			  //i only want one stream...  having a nested JSON screws up other stuff
+			  if(streams[0]){
+			  	streams = streams[0];
+			}
+			  streamKey = streams.streamKey;
+			  streamId = streams.liveStreamId;
+			  console.log( streamKey,streamId);
+			  rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
+			  console.log("rtmp endpoint",rtmpEndpoint );
+			  var streamUrl = "https://live.api.video/" + streamId;
+			  liveStreamManifest = streamUrl+".m3u8";
+			  //api response says "broadcasting:false". let's fix that
+			  streams.broadcasting = true;
+
+			  //the API response needs to be a string
+			  var  liveResponse = JSON.stringify(streams,null, 2);
+			  //in addition to sending the API response, we should havea. placeholder message while the video buffersup
+			  var  videoResponse = "Your Livestream will start in a few seconds..."
+
+			  //finally - the iframecode is not an iframe, but for videojs
+			  iframecode = "iframe width='0' height='0' style='display:none'";
+
+			  console.log(iframecode);
+			  //we should not reyurn the page until broadcasting is true
+			  //but broadcasting cant be true until the camera starts - ehich requires the page!
+
+ 
+			  return res.render('index', {iframecode, videoResponse, rtmpEndpoint, liveStreamManifest, liveResponse});   	 		}
 		
 	}else{
 	    //reset to default image
@@ -156,6 +195,9 @@ app.get('/', (req, res) => {
 	
   
 });
+
+
+
 
 //the form posts the data to the same location
 //so now we'll deal with the submitted data

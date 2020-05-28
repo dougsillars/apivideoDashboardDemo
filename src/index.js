@@ -343,13 +343,22 @@ app.get('/', (req, res) => {
 		//for the homepage demo - we have 10 RTMP servers in canada and 10 in France to lower latency
 		//where are we?
 		var os = require("os");
-		var hostname = os.hostname();
-		console.log("hostname", hostname);
+		var hostName = os.hostname();
+		console.log("hostname", hostName);
 		
+		//there are 10 enpoints in EU with the name "live"
+		var nameSearch = "live";
+		//there are 10 endpoints in NA with the name Canada
+		//if using node in canada, use the to canada endpoints 
+		if (hostname == "broadcast-cnbhs3-01"){
+			//canada server
+			nameSearch = "canada";
+		}
+		console.log("nameSearch", nameSearch);
 		//
-		let streamList = client.lives.search();	
+		let streamList = client.lives.search({"name": nameSearch});	
 		streamList.then(function(streams) {
-			
+			//console.log(streams);
 			let streamCount = streams.length;
 			var streamKey;
 			var streamId;
@@ -366,7 +375,17 @@ app.get('/', (req, res) => {
 				//valid stream
 				streamKey = streams[chosenStream].streamKey;
 				streamId = streams[chosenStream].liveStreamId;
-				rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
+				//this is correct for standard connections.. for the website demo - we are using a different endpoint
+				//rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
+				
+				//use this endpoint *just* for the website demo
+				if(hostName == "dougs-MBP-2"){
+					rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
+					
+				} else{
+				
+				 	rtmpEndpoint = "rtmp://127.0.0.1:1935/s/"+streamKey;
+				}
 				console.log("rtmp endpoint",rtmpEndpoint );
 			}
 			//we've esablished the stream, we want to use, so connect the id with the bas url

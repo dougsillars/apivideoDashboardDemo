@@ -27,7 +27,8 @@ if(live){
     window.onload = function(){
 		//dragand drop for live
 		dropVideo();
-		
+		//style radio buttons
+		radioButton();
 		
     //define the video player  and url 
     //only start the live player X seconds after starting recording
@@ -43,19 +44,13 @@ if(live){
 			//liveManifest https://live.api.video/li2kvDGqdxa0q5AsOOBaGA1k.m3u8  
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
+			var playerUrl = jsonResponse.assets.player;
+			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>";
 			console.log("videoId",videoId);
-			//add player
-			//No match found for selector result__videoWrapper
-	        window.player = apiVideoSdk.create("#liveVideo", { 
-	            id: videoId, 
-	            live: true,
-				autoplay:true,
-				muted:true 
-	        });
 	
 				
 				//place the JSON into the response area
-			document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML = responseString;
           },livestreamTimeout);  
 	  }
 	
@@ -65,13 +60,60 @@ if(live){
 	
 	//not live
 	window.onload = function(){
+		
+
+		radioButton();
    		dropVideo();
 	}
 		
 }
 
 
-
+function radioButton(){
+	var useSandbox = document.getElementById("useSandbox").innerHTML;
+	useSandbox = useSandbox.trim();
+	var productionAvailable = document.getElementById("productionAvailable").innerHTML;
+	productionAvailable = productionAvailable.trim();
+	console.log("useSandbox", useSandbox, typeof(useSandbox), useSandbox.length);
+	
+	if(useSandbox === "true"){
+		document.getElementById("sandbox").checked = "true";
+		console.log("checking sandbox radio");
+		document.getElementById("vodsandbox").value="true";
+		document.getElementById("livesandbox").value="true";
+	}else if(useSandbox === "false"){
+		//productiion
+		document.getElementById("production").checked = "true";
+		console.log("checking prod radio");
+		document.getElementById("vodsandbox").value="false";
+		document.getElementById("livesandbox").value="false";
+	}
+	if(productionAvailable ==="false"){
+		//disable the prodction radio button
+		document.getElementById("production").disabled = "true";
+		document.getElementsByClassName("production")[0].style.color = "gray";
+	}
+	
+	//now - what if the default was overridden by the user
+	
+	var radioSandbox = document.getElementById("sandbox");
+	var radioProduction = document.getElementById("production");
+	radioSandbox.addEventListener('click', function(){
+		document.getElementById("sandbox").checked = "true";
+		console.log("checking sandbox radio");
+		document.getElementById("vodsandbox").value="true";
+		document.getElementById("livesandbox").value="true";
+		console.log("sandbox clicked");
+	});
+	radioProduction.addEventListener('click', function(){
+		document.getElementById("production").checked = "true";
+		console.log("checking prod radio");
+		document.getElementById("vodsandbox").value="false";
+		document.getElementById("livesandbox").value="false";
+		console.log("prod clicked");
+	});
+	
+}
  
 function dropVideo(){
 	
@@ -267,8 +309,8 @@ function show_output(str){
 			console.log('ERROR: server disconnected!' +reason);
 			
 			//error message to users
-			//document.getElementsByClassName("result__server__body")[0].innerHTML
-			document.getElementsByClassName("result__server__body")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
+			//document.getElementsByClassName("resultsWrapper")[0].innerHTML
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
 					
 	
 		});
@@ -286,7 +328,12 @@ function requestMedia(){
 	var framerate = 15;
 	*/
 	console.log("request media");
-	var constraints = { audio: true
+	var constraints = { audio: {sampleRate: audioBitrate},
+		video:{
+	        width: { min: 100, ideal: width, max: 1920 },
+	        height: { min: 100, ideal: height, max: 1080 },
+			frameRate: {ideal: framerate}
+	    }
 	};
 	console.log(constraints);
 	navigator.getUserMedia = (navigator.mediaDevices.getUserMedia ||
@@ -347,8 +394,8 @@ function requestMedia(){
 		console.log(err);
 		var error ="unknown";
 		var errorMessage = "Sorry, an unknown error occurred.";
-		var blackbox = document.getElementsByClassName("result__server__body");
-		//there is only one element with the class result__server__body
+		var blackbox = document.getElementsByClassName("resultsWrapper");
+		//there is only one element with the class resultsWrapper
 		if(err.message){
 			error = err.message;
 		}

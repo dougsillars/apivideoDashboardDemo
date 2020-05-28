@@ -344,13 +344,13 @@ app.get('/', (req, res) => {
 		//where are we?
 		var os = require("os");
 		var hostName = os.hostname();
-		console.log("hostname", hostName);
+		console.log("hostName", hostName);
 		
 		//there are 10 enpoints in EU with the name "live"
 		var nameSearch = "live";
 		//there are 10 endpoints in NA with the name Canada
 		//if using node in canada, use the to canada endpoints 
-		if (hostname == "broadcast-cnbhs3-01"){
+		if (hostName == "broadcast-cnbhs3-01"){
 			//canada server
 			nameSearch = "canada";
 		}

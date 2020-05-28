@@ -1,5 +1,5 @@
 env
-cd /home/ubuntu/videosite
+cd /home/libcast/apivideoDashboardDemo
 git pull
-/usr/bin/npm run startprod
-                          
+/home/libcast/local/bin/npm install
+/home/libcast/local/bin/npm run startprod

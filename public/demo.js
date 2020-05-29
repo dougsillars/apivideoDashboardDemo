@@ -286,8 +286,13 @@ function requestMedia(){
 	var framerate = 15;
 	*/
 	console.log("request media");
-	var constraints = { audio: true
-	};
+	var constraints = { audio: {sampleRate: audioBitrate},
+						video:{
+		        			width: { min: 100, ideal: width, max: 1920 },
+		       			 	height: { min: 100, ideal: height, max: 1080 },
+		        			frameRate: {ideal: framerate}
+		    			}
+					};
 	console.log(constraints);
 	navigator.getUserMedia = (navigator.mediaDevices.getUserMedia ||
                       navigator.mediaDevices.mozGetUserMedia ||

@@ -350,7 +350,7 @@ app.get('/', (req, res) => {
 		var nameSearch = "live";
 		//there are 10 endpoints in NA with the name Canada
 		//if using node in canada, use the to canada endpoints 
-		if (hostName == "broadcast-cnbhs3-01"){
+		if (hostName == "broadcast-demo-ca-01"){
 			//canada server
 			nameSearch = "canada";
 		}

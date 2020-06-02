@@ -44,6 +44,11 @@ const apiVideo = require('@api.video/nodejs-sdk');
 var apiVideoSandbox="";
 var apiVideoProduction = "";
 
+//for the homepage demo - there is logic to serve streams from Canada.
+//by default it is EU
+var canadaHost = "broadcast-demo-ca-01";
+
+
 //by default. assume that we'll use the sandbox, and that no prod is avaul
 var useSandbox=true;
 var productionAvailable=false;
@@ -347,13 +352,17 @@ app.get('/', (req, res) => {
 		console.log("hostName", hostName);
 		
 		//there are 10 enpoints in EU with the name "live"
+		//this is the default
 		var nameSearch = "live";
 		//there are 10 endpoints in NA with the name Canada
-		//if using node in canada, use the to canada endpoints 
-		if (hostName == "broadcast-demo-ca-01"){
-			//canada server
+		//if using canada server, use the to canada endpoints 
+		if (hostName == canadaHost){
+			//host ins in canada
+			//search for streams with name canada
 			nameSearch = "canada";
 		}
+		
+		
 		console.log("nameSearch", nameSearch);
 		//
 		let streamList = client.lives.search({"name": nameSearch});	

@@ -425,6 +425,8 @@ app.get('/', (req, res) => {
 		});
 		
 		
+		
+		
 	}else{
 	    //reset to default image
 		//iframecode = "img src="+placeholderImage;

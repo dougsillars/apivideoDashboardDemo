@@ -427,7 +427,11 @@ app.get('/', (req, res) => {
 		
 	}else{
 	    //reset to default image
-		iframecode = "img src="+placeholderImage;
+		//iframecode = "img src="+placeholderImage;
+		//globe video
+		let player = "https://embed.api.video/vod/vi5oDagRVJBSKHxSiPux5rYD";
+		iframecode = "iframe id='videoPlayer', src='"+player+"#autoplay;loop', height='100%', width='100%'";
+		
 		var videoResponse = "When you upload a video, the API response will appear here."
 		//not live..just loading the page
 		console.log("default page", iframecode);

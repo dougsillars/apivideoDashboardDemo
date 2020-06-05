@@ -70,7 +70,7 @@ app.get('/dashboard', (req, res) => {
 	//get the apikeys - only needed on get for first load
 	//not present on subsequent loads...
 	if(req.query.sandbox){
-		//we got an api key!!
+		//we got sandbox api key!!
 		apiVideoSandbox = req.query.sandbox;
 		useSandbox=true;
 		console.log("sandbox");
@@ -88,6 +88,7 @@ app.get('/dashboard', (req, res) => {
 	if(req.query.livesandbox == "false"){
 		//use production
 		useSandbox = false;
+
 		console.log("production!!");
 	}else if(req.query.livesandbox == "true"){
 		useSandbox = true;
@@ -388,7 +389,7 @@ app.get('/', (req, res) => {
 				//rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
 				
 				//use this endpoint *just* for the website demo
-				if(hostName == "dougs-MBP-2"){
+				if(hostName == "Dougs-MacBook-Pro.local"){
 					rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
 					
 				} else{

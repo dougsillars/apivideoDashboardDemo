@@ -81,12 +81,18 @@ function radioButton(){
 		console.log("checking sandbox radio");
 		document.getElementById("vodsandbox").value="true";
 		document.getElementById("livesandbox").value="true";
+
+		document.getElementById("sandboxDiv").className="sandboxActive";
+		document.getElementById("productionDiv").className="production";
 	}else if(useSandbox === "false"){
 		//productiion
 		document.getElementById("production").checked = "true";
 		console.log("checking prod radio");
 		document.getElementById("vodsandbox").value="false";
 		document.getElementById("livesandbox").value="false";
+
+		document.getElementById("sandboxDiv").className="sandbox";
+		document.getElementById("productionDiv").className="productionActive";
 	}
 	if(productionAvailable ==="false"){
 		//disable the prodction radio button
@@ -96,14 +102,17 @@ function radioButton(){
 	
 	//now - what if the default was overridden by the user
 	
-	var radioSandbox = document.getElementById("sandbox");
-	var radioProduction = document.getElementById("production");
+	var radioSandbox = document.getElementById("sandboxDiv");
+	var radioProduction = document.getElementById("productionDiv");
 	radioSandbox.addEventListener('click', function(){
 		document.getElementById("sandbox").checked = "true";
 		console.log("checking sandbox radio");
 		document.getElementById("vodsandbox").value="true";
 		document.getElementById("livesandbox").value="true";
 		console.log("sandbox clicked");
+
+		document.getElementById("sandboxDiv").className="sandboxActive";
+		document.getElementById("productionDiv").className="production";
 	});
 	radioProduction.addEventListener('click', function(){
 		document.getElementById("production").checked = "true";
@@ -111,6 +120,9 @@ function radioButton(){
 		document.getElementById("vodsandbox").value="false";
 		document.getElementById("livesandbox").value="false";
 		console.log("prod clicked");
+
+		document.getElementById("sandboxDiv").className="sandbox";
+		document.getElementById("productionDiv").className="productionActive";
 	});
 	
 }

@@ -1,5 +1,5 @@
 head 
-  link(rel='stylesheet', href='https://api-video-website.netlify.app/assets/styles/demoStyle.css')
+  link(rel='stylesheet', href='/dashboard.css')
   link(rel='icon', href='/icon.ico', type='image/x-icon')
   script(src='/socket.io.js')
   script(src='/dashboarddemo.js')
@@ -7,33 +7,38 @@ head
 body
 
   .container
-   .actionsWrapper
-    .action_environment
-      .sandbox(style="padding-right:20px; padding-bottom:10px;")
-       input(type="radio" name="envir" value='sandbox' id='sandbox' checked="checked" )
-       | Sandbox
-      .production(style="padding-right:20px; padding-bottom:10px;")
-       input(type="radio" name="envir" value='production' id='production' ) 
-       | Production
+
+   .topRow
+      .getStarted(class = "getStarted")
+         | Get Started
+      .action_environment
+          #sandboxDiv Sandbox
+          #productionDiv Production
+            input(style='display:none' type="radio" name="envir" value='sandbox' id='sandbox' checked="checked" )
+            input(style='display:none' type="radio" name="envir" value='production' id='production' )        
+   .resultRow    
+    .resultsWrapper
+     p !{videoResponse}
+   .vodOrLiveRow  
     .action__upload(id='action__upload')
         form(id='upload',name='uploadForm',action='dashboard' ,method = 'POST',  enctype="multipart/form-data")
           input(id='vodsandbox',type='text', name = "vodsandbox", value="true",style='display:none')
           label(for='file', class="uploadFile")
            .uploadFile__icon
-            img(draggable="false", src="https://www.datocms-assets.com/26885/1589195859-upload.png", alt="")
+            img(draggable="false", src="upload.png", alt="")
            .uploadFile__content
-            span(class='uploadFile__content__title') Drop a video here
-            span(class='uploadFile__content__desc')  or click to browse for a file (max 100mb)
+            span(style="font-size: 18px;") <b>Upload</b><br/><br/>
+            span(class='uploadFile__content__desc')  Drop a video here or <b>click to browse</b> for a file (max 100mb)
            input(id='file',type='file', name="source", class="inputFile", style='display:none', onclick='thisFileUpload();')
-    .action__or
-      span or       
+     
     .action__live
         form(name='livestreamForm',action='dashboard' method = 'GET')
           input(id='livetext',type='text', name = "live", value="true",style='display:none')
           input(id='livesandbox',type='text', name = "livesandbox", value="true",style='display:none')
-          input(class = "gradientButton",type="submit", name="livestream", value ='Live with your webcam' onclick='initiateLivestream();')
-   .resultsWrapper(style='align:center')
-     | !{videoResponse}
+          span(style="font-size: 18px;") <b>Livestream</b><br/><br/>
+          span(class='uploadFile__content__desc') Start live streaming from your cam<br/>
+          input(type="submit", class="liveButton" name="livestream", value ='Start' onclick='initiateLivestream();')
+
   #liveTest
   #Livestream
     p 

@@ -27,7 +27,7 @@ if(live){
     window.onload = function(){
 		//dragand drop for live
 		dropVideo();
-		
+	
 		
     //define the video player  and url 
     //only start the live player X seconds after starting recording
@@ -65,11 +65,12 @@ if(live){
 	
 	//not live
 	window.onload = function(){
-   		dropVideo();
+		   dropVideo();
+	
+		
 	}
 		
 }
-
 
 
  

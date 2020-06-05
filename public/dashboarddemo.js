@@ -114,17 +114,22 @@ function radioButton(){
 		document.getElementById("sandboxDiv").className="sandboxActive";
 		document.getElementById("productionDiv").className="production";
 	});
-	radioProduction.addEventListener('click', function(){
-		document.getElementById("production").checked = "true";
-		console.log("checking prod radio");
-		document.getElementById("vodsandbox").value="false";
-		document.getElementById("livesandbox").value="false";
-		console.log("prod clicked");
-
-		document.getElementById("sandboxDiv").className="sandbox";
-		document.getElementById("productionDiv").className="productionActive";
-	});
+	//only chage stuff to productionif production is possible
+	if(productionAvailable ==="true"){
+		radioProduction.addEventListener('click', function(){
+		
 	
+			document.getElementById("production").checked = "true";
+			console.log("checking prod radio");
+			document.getElementById("vodsandbox").value="false";
+			document.getElementById("livesandbox").value="false";
+			console.log("prod clicked");
+
+			document.getElementById("sandboxDiv").className="sandbox";
+			document.getElementById("productionDiv").className="productionActive";
+		
+		});
+	}
 }
  
 function dropVideo(){

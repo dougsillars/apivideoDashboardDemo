@@ -8,7 +8,7 @@ var audioBitrate = 11025;
 var width = 240;
 var height = 240;
 var livestreamTimeout = 15000;
-
+var livestreamOk = true;
 
 
 if(live){
@@ -49,8 +49,12 @@ if(live){
 			console.log("videoId",videoId);
 	
 				
+			//now we can enter the livestream JSON response... but only if the playback is ok
+			//livestreamOk onlu fails if you dont give camera access - or if you use safarii
+			if(livestreamOk){
 				//place the JSON into the response area
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML = responseString;
+				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
+			}
           },livestreamTimeout);  
 	  }
 	
@@ -260,7 +264,7 @@ function show_output(str){
                           navigator.mediaDevices.msGetUserMedia ||
                           navigator.mediaDevices.webkitGetUserMedia);
 		if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
-		if(!MediaRecorder){fail('No MediaRecorder available.');}
+	//	if(!MediaRecorder){fail('No MediaRecorder available.');}
         
 		var socketOptions = {secure: true, reconnection: true, reconnectionDelay: 1000, timeout:15000, pingTimeout: 			15000, pingInterval: 45000,query: {framespersecond: framerate, audioBitrate: audioBitrate}};
 		
@@ -418,13 +422,16 @@ function requestMedia(){
 		}
 		
 		
-		if(error.includes("Invalid constraint")){
+		if(error.includes("MediaRecorder")){
+			console.log("error", error);
 			//getUserMedia is not supported in the browser (probably safari)
-			errorMessage="Sorry, but your browser does not support the APIs for live streaming.  Please try Firefox, Chrome or Edge.";
+			errorMessage="Sorry, but your browser does not support the MediaRecorder API required for live streaming.  Please try Firefox, Chrome or Edge.";
 		}else if("The request is not allowed"){
 			errorMessage="Sorry, but you must allow camera and microphone access to record video.";
 			
 		}
+				//livestream is not ok :(
+					livestreamOk = false;
 		blackbox[0].innerHTML=errorMessage;
 		 state="stop";
 		

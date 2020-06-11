@@ -1,7 +1,7 @@
     //mysql for the productID -> api key in the dashboard demo
      var mysql = require('mysql');
     
-     var productIdSandbox = prUMsehoEjCfbzxl1eeV00I;
+     var productIdSandbox = "prUMsehoEjCfbzxl1eeV00I";
     //now we have the productId for sand box and production
 	//lookup the api keys in the database
 	var con = mysql.createConnection({

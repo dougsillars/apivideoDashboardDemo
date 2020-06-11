@@ -29,6 +29,10 @@ const formidable = require('formidable')
 //email-validator to validate the email address
 var validator = require("email-validator");
 
+//mysql for the productID -> api key in the dashboard demo
+var mysql = require('mysql');
+
+
 //ctreate timers to measure upload and processing timings
     let startUploadTimer;
 	let uploadCompleteTimer;
@@ -43,6 +47,8 @@ const apiVideo = require('@api.video/nodejs-sdk');
 //apikeys
 var apiVideoSandbox="";
 var apiVideoProduction = "";
+var productIdSandbox = "";
+var productIdProduction = "";
 
 //for the homepage demo - there is logic to serve streams from Canada.
 //by default it is EU
@@ -71,17 +77,33 @@ app.get('/dashboard', (req, res) => {
 	//not present on subsequent loads...
 	if(req.query.sandbox){
 		//we got sandbox api key!!
-		apiVideoSandbox = req.query.sandbox;
+		productIdSandbox = req.query.sandbox;
 		useSandbox=true;
 		console.log("sandbox");
 	}
 	if(req.query.production){
 		//we got prod api key
-		apiVideoProduction = req.query.production;
+		productIdProduction = req.query.production;
 		productionAvailable = true;
 		//if prod is available - default is to stream and upload to prod
 		useSandbox=false;
 	}
+
+	//now we have the productId for sand box and production
+	//lookup the api keys in the database
+	var con = mysql.createConnection({
+		host: "psql.api.video",
+		user: "libcast",
+		database: "subscription"
+	  });
+
+	  con.connect(function(err) {
+		if (err) throw err;
+		con.query("SELECT value from public.api_key where project_id ="+ productIdSandbox, function (err, result, fields) {
+		  if (err) throw err;
+		  console.log(result);
+		});
+	  });
 	
 	//on subsequent loads - sandbox is chosen by the customer.
 	//use sandbox or prod

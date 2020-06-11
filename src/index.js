@@ -102,7 +102,7 @@ app.get('/dashboard', (req, res) => {
 		if (err) throw err;
 		con.query("SELECT value from public.api_key where project_id = {$projectId}", function (err, result, fields) {
 		  if (err) throw err;
-		  console.log(result);
+		  console.log("sql query", result);
 		});
 	  });
 	

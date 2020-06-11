@@ -1,5 +1,6 @@
 head 
   link(rel='stylesheet', href='https://api-video-website.netlify.app/assets/styles/demoStyle.css')
+  link(rel='stylesheet', href='/style.css')
   link(rel='icon', href='/icon.ico', type='image/x-icon')
   script(src='/socket.io.js')
   script(src='https://embed.api.video/sdk.js')
@@ -34,6 +35,7 @@ body
         .result__videoWrapper
           #{iframecode}
           #liveVideo
+  #videoRefresh
   #liveTest
   #Livestream
     p 
@@ -42,7 +44,4 @@ body
   #liveManifest(style='display:none') #{liveStreamManifest}  
   #liveResponse(style='display:none') #{liveResponse}  
   #rtmpEndpoint(style='display:none') #{rtmpEndpoint}
-  #video_show()
-  
-	
-    
+  #video_show(style='display:none')

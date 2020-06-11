@@ -55,7 +55,11 @@ if(live){
 				//place the JSON into the response area
 				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
 			}
-          },livestreamTimeout);  
+		  },livestreamTimeout);  
+		  
+		  
+
+
 	  }
 	
 	

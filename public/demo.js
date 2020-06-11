@@ -44,7 +44,8 @@ if(live){
 			//liveManifest https://live.api.video/li2kvDGqdxa0q5AsOOBaGA1k.m3u8  
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
-			console.log("videoId",videoId);
+			var videoUrl = jsonResponse.assets.player + "#autoplay";
+			console.log("jsonResponse",jsonResponse);
 			//add player
 			//No match found for selector result__videoWrapper
 	        window.player = apiVideoSdk.create("#liveVideo", { 
@@ -60,6 +61,37 @@ if(live){
 				//place the JSON into the response area
 				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
 			}
+			//sometimes there is an error with video startup
+			//and the  livestreamTimeout was not long enough.
+			//insert a button to reload the video player
+			//so we'll add a button that reloads the player
+
+
+
+			//var refreshButton = document.createElement("refreshButton");
+			//refreshButton.className = "refreshButton";
+
+			//refreshButton.innerHTML= "refresh video";
+			var videoRefresh = document.getElementById("videoRefresh");
+			videoRefresh.innerHTML= "refresh video";
+			videoRefresh.className = "videoRefresh";
+			//videoRefresh.appendChild(refreshButton); 
+
+			videoRefresh.addEventListener('click', function(){
+				//refresh the video player
+				console.log("window.player",window.player);
+				var iframeList = document.getElementsByTagName('iframe');
+				console.log("iframeList", iframeList);
+				
+				iframeList[1].id = "liveVideoiframe";
+				console.log("iframeList1", iframeList[1]);
+				//adding empty space causes iframe to reload
+				document.getElementById("liveVideoiframe").src = videoUrl;
+				document.getElementById("liveVideoiframe").src +='';
+				
+			}
+			);
+
           },livestreamTimeout);  
 	  }
 	
@@ -114,22 +146,6 @@ function dropVideo(){
 		console.log("fileElement", fileElement.files);
 		//var upload = document.getElementById('upload');
 		
-		
-		
-		//forminJS.append('username', 'Chris');
-	    //forminJS.append('source', file[0], 'myvideo.mp4');
-		//console.log("forminJSuserbname",forminJS.getAll('username'));
-		//console.log("forminJSfile",forminJS.getAll('source'));
-		//console.log("forminJS", forminJS);
-		
-        //uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
-	    //var fileElement = document.getElementById('file');
-		//fileElement.files[0] = file[0];
-		
-		//console.log("formData2",formData);
-		//console.log("fileelement",fileElement);
-		//console.log("fileelement files",fileElement.files);
-		//uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
         uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
 	 
 	  }

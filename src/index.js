@@ -79,7 +79,7 @@ app.get('/dashboard', (req, res) => {
 		//we got sandbox api key!!
 		productIdSandbox = req.query.sandbox;
 		useSandbox=true;
-		console.log("sandbox");
+		console.log("sandbox", productIdSandbox);
 	}
 	if(req.query.production){
 		//we got prod api key
@@ -87,6 +87,7 @@ app.get('/dashboard', (req, res) => {
 		productionAvailable = true;
 		//if prod is available - default is to stream and upload to prod
 		useSandbox=false;
+		console.log("productIdProduction", productIdProduction);
 	}
 
 	//now we have the productId for sand box and production
@@ -99,7 +100,7 @@ app.get('/dashboard', (req, res) => {
 
 	  con.connect(function(err) {
 		if (err) throw err;
-		con.query("SELECT value from public.api_key where project_id ="+ productIdSandbox, function (err, result, fields) {
+		con.query("SELECT value from public.api_key where project_id = {$projectId}", function (err, result, fields) {
 		  if (err) throw err;
 		  console.log(result);
 		});

@@ -1,6 +1,6 @@
 .videoRefresh{
   float: right;
-  border: 1px solid black;
+  border: 1px solid rgb(228,228,228);
   padding: 10px;
   font-family: "JetBrainsMono", monospace;
   font-size: 16px;

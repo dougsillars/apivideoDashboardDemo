@@ -44,7 +44,6 @@ if(live){
 			//liveManifest https://live.api.video/li2kvDGqdxa0q5AsOOBaGA1k.m3u8  
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
-			var videoUrl = jsonResponse.assets.player + "#autoplay";
 			console.log("jsonResponse",jsonResponse);
 			//add player
 			//No match found for selector result__videoWrapper
@@ -66,14 +65,8 @@ if(live){
 			//insert a button to reload the video player
 			//so we'll add a button that reloads the player
 
-
-
-			//var refreshButton = document.createElement("refreshButton");
-			//refreshButton.className = "refreshButton";
-
-			//refreshButton.innerHTML= "refresh video";
 			var videoRefresh = document.getElementById("videoRefresh");
-			videoRefresh.innerHTML= "refresh video";
+			videoRefresh.innerHTML= "Refresh Live Video";
 			videoRefresh.className = "videoRefresh";
 			//videoRefresh.appendChild(refreshButton); 
 
@@ -86,7 +79,6 @@ if(live){
 				iframeList[1].id = "liveVideoiframe";
 				console.log("iframeList1", iframeList[1]);
 				//adding empty space causes iframe to reload
-				document.getElementById("liveVideoiframe").src = videoUrl;
 				document.getElementById("liveVideoiframe").src +='';
 				
 			}

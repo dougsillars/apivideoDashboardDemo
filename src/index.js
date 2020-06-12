@@ -110,7 +110,7 @@ app.get('/dashboard', (req, res) => {
 		}
 	}	
 
-	
+	console.log("after if sandbox", apiVideoSandbox);
 	
 	//on subsequent loads - sandbox is chosen by the customer.
 	//use sandbox or prod
@@ -765,8 +765,9 @@ function streamPicker(streams, counter){
 }
 
 function apiKeyQuery(query){
+	var key;
     pool.query(query, (err, res) => {
-		var key = res.rows[0].values;
+		key = res.rows[0].values;
 		console.log("key", key);
 		pool.end;
 	});

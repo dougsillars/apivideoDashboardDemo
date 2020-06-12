@@ -13,7 +13,7 @@
 
       const query = {
         name: "get api key",  
-        text: 'SELECT value from public.api_key where project_id = '+ productIdSandbox
+        text: 'SELECT value from public.api_key where project_id = \''+ productIdSandbox +'\''
       }
 
       pool.query(query, (err, res) => {

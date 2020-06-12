@@ -109,16 +109,18 @@ app.get('/dashboard', (req, res) => {
 				text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdProduction+'\''
 			}
 	}
-
-	apiVideoSandbox = apiKeyQuery(querySandbox);
-		apiVideoSandbox.then( function() {
-			apiVideoProduction = apiKeyQuery(queryProduction);
-			apiVideoProduction( function(){
-				//we have both api keys now
-				console.log("apiVideoSandbox", apiVideoSandbox);
+		//get sandbox key
+		pool.query(querySandbox, (err, res) => {
+			apiVideoSandbox = res.rows[0].values;
+			console.log("apiVideoSandbox", apiVideoSandbox);
+			pool.end;
+		//now get production key
+			pool.query(queryProduction, (err, res) => {
+				apiVideoProduction = res.rows[0].values;
 				console.log("apiVideoProduction", apiVideoProduction);
+				pool.end;
 
-				
+				//now I have both api keys... I can continue down the path I had before
 				//on subsequent loads - sandbox is chosen by the customer.
 				//use sandbox or prod
 				if(req.query.livesandbox == "false"){
@@ -223,18 +225,8 @@ app.get('/dashboard', (req, res) => {
 				}
 				
 
-
-
-
-
 			});
 		});
-	
-		
-
-	
-	
-	
   
 });
 
@@ -785,14 +777,6 @@ function streamPicker(streams, counter){
 	
 }
 
-function apiKeyQuery(query){
-	var key;
-    pool.query(query, (err, res) => {
-		key = res.rows[0].values;
-		console.log("key", key);
-		pool.end;
-	});
-	return key;
-}
+
 
 

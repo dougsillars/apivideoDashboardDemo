@@ -111,6 +111,7 @@ app.get('/dashboard', (req, res) => {
 	}
 		//get sandbox key
 		pool.query(querySandbox, (err, res) => {
+			console.log("response", res);
 			apiVideoSandbox = res.rows[0].values;
 			console.log("apiVideoSandbox", apiVideoSandbox);
 			pool.end;

@@ -111,8 +111,8 @@ app.get('/dashboard', (req, res) => {
 
 		pool.query(querySandbox, (err, res) => {
 			console.log("re", res);
-			console.log("sandbox key", res.rows[0].values);
-			apiVideoSandbox = res.rows[0].values;
+			console.log("sandbox key", res.rows[0].value);
+			apiVideoSandbox = res.rows[0].value;
 			console.log("apiVideoSandbox", apiVideoSandbox);
 			pool.end;
 		//now get production key
@@ -121,8 +121,8 @@ app.get('/dashboard', (req, res) => {
 			text:"SELECT value from public.api_key where project_id =\'" +productIdProduction+'\''
 		}
 			pool.query(queryProduction, (err, res1) => {
-				console.log("prod key", res1.rows[0].values);
-				apiVideoProduction = res1.rows[0].values;
+				console.log("prod key", res1.rows[0].value);
+				apiVideoProduction = res1.rows[0].value;
 				console.log("apiVideoProduction", apiVideoProduction);
 				pool.end;
 

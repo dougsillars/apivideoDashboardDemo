@@ -116,6 +116,119 @@ app.get('/dashboard', (req, res) => {
 				console.log("apiVideoSandbox", apiVideoSandbox);
 				console.log("apiVideoProduction", apiVideoProduction);
 
+
+
+
+
+
+				//on subsequent loads - sandbox is chosen by the customer.
+				//use sandbox or prod
+				if(req.query.livesandbox == "false"){
+					//use production
+					useSandbox = false;
+
+					console.log("production!!");
+				}else if(req.query.livesandbox == "true"){
+					useSandbox = true;
+					console.log("sandbox!!");
+				}
+				//now set the api client
+				if(useSandbox){
+					client = new apiVideo.Client({ apiKey: apiVideoSandbox});
+				}else{
+					client = new apiVideo.Client({ apiKey: apiVideoProduction});
+				}
+				
+				console.log("use sandbox?", useSandbox);
+				console.log("client", client);
+				
+				
+				console.log("productionAvailable", productionAvailable);
+				//Just sandbox right now
+				
+				
+
+				if(live){
+					//we have to add a livestream!
+					console.log("live!");
+					//live & socket stuff
+					var spawn = require('child_process').spawn;
+					const server = require('http').createServer(app);
+					var io = require('socket.io')(server);
+					spawn('ffmpeg',['-h']).on('error',function(m){
+						console.error("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
+						process.exit(-1);
+					});
+					//set up a  RTMP server from the list
+					//list of streams from api.video
+					//see if there are livestreams already created with the name DashboardLive
+					let streamList = client.lives.search({name:"DashboardLive"});	
+						//there will eitehr be one.. or not.
+						streamList.then(function(streams) {
+							if(streams.length >0 ){
+								console.log("found existing livestream", streams);
+								// run function to return stream
+								publishLiveStream(streams);
+						
+							}else{
+								let newStream = client.lives.create('DashboardLive');
+								newStream.then(function(streams){
+									console.log("creating new livestream", streams);
+									// run function to return stream
+									publishLiveStream(streams);
+								});
+							}
+
+				
+						});	
+				
+						function publishLiveStream(streams){
+							console.log(streams);	
+						var streamId;
+						var streamKey;
+						//i only want one stream...  having a nested JSON screws up other stuff
+						if(streams[0]){
+							streams = streams[0];
+						}
+						streamKey = streams.streamKey;
+						streamId = streams.liveStreamId;
+						console.log( streamKey,streamId);
+						rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
+						console.log("rtmp endpoint",rtmpEndpoint );
+						var streamUrl = "https://live.api.video/" + streamId;
+						liveStreamManifest = streamUrl+".m3u8";
+						//api response says "broadcasting:false". let's fix that
+						streams.broadcasting = true;
+
+						//the API response needs to be a string
+						var  liveResponse = JSON.stringify(streams,null, 2);
+						//in addition to sending the API response, we should havea. placeholder message while the video buffersup
+						var  videoResponse = "Your Livestream will start in a few seconds..."
+
+						//finally - the iframecode is not an iframe, but for videojs
+						iframecode = "iframe width='0' height='0' style='display:none'";
+
+						console.log(iframecode);
+						//we should not reyurn the page until broadcasting is true
+						//but broadcasting cant be true until the camera starts - ehich requires the page!
+
+			
+						return res.render('dashboardindex', { videoResponse, rtmpEndpoint, liveStreamManifest, liveResponse, useSandbox, productionAvailable});   	 		}
+					
+				}else{
+					//reset to default image
+					iframecode = "img src="+placeholderImage;
+					var videoResponse = "When you upload a video, the API response will appear here."
+					//not live..just loading the page
+					console.log("default page", iframecode);
+					return res.render('dashboardindex', {iframecode, videoResponse, useSandbox, productionAvailable});
+				}
+				
+
+
+
+
+
 			});
 		});
 	
@@ -123,108 +236,6 @@ app.get('/dashboard', (req, res) => {
 
 	
 	
-	//on subsequent loads - sandbox is chosen by the customer.
-	//use sandbox or prod
-	if(req.query.livesandbox == "false"){
-		//use production
-		useSandbox = false;
-
-		console.log("production!!");
-	}else if(req.query.livesandbox == "true"){
-		useSandbox = true;
-		console.log("sandbox!!");
-	}
-	//now set the api client
-	if(useSandbox){
-		client = new apiVideo.Client({ apiKey: apiVideoSandbox});
-	}else{
-		client = new apiVideo.Client({ apiKey: apiVideoProduction});
-	}
-	
-	console.log("use sandbox?", useSandbox);
-	console.log("client", client);
-	
-	
-	console.log("productionAvailable", productionAvailable);
-	//Just sandbox right now
-	
-	
-
-	if(live){
-		//we have to add a livestream!
-		console.log("live!");
-		//live & socket stuff
-		var spawn = require('child_process').spawn;
-		const server = require('http').createServer(app);
-		var io = require('socket.io')(server);
-		spawn('ffmpeg',['-h']).on('error',function(m){
-			console.error("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
-			process.exit(-1);
-		});
-		//set up a  RTMP server from the list
-		//list of streams from api.video
-		//see if there are livestreams already created with the name DashboardLive
-        let streamList = client.lives.search({name:"DashboardLive"});	
-			//there will eitehr be one.. or not.
-			streamList.then(function(streams) {
-				if(streams.length >0 ){
-					console.log("found existing livestream", streams);
-					// run function to return stream
-					publishLiveStream(streams);
-			
-				}else{
-					let newStream = client.lives.create('DashboardLive');
-					newStream.then(function(streams){
-						console.log("creating new livestream", streams);
-						// run function to return stream
-						publishLiveStream(streams);
-					});
-				}
-
-	
-			});	
-	
-			function publishLiveStream(streams){
-				console.log(streams);	
-			  var streamId;
-			  var streamKey;
-			  //i only want one stream...  having a nested JSON screws up other stuff
-			  if(streams[0]){
-			  	streams = streams[0];
-			}
-			  streamKey = streams.streamKey;
-			  streamId = streams.liveStreamId;
-			  console.log( streamKey,streamId);
-			  rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
-			  console.log("rtmp endpoint",rtmpEndpoint );
-			  var streamUrl = "https://live.api.video/" + streamId;
-			  liveStreamManifest = streamUrl+".m3u8";
-			  //api response says "broadcasting:false". let's fix that
-			  streams.broadcasting = true;
-
-			  //the API response needs to be a string
-			  var  liveResponse = JSON.stringify(streams,null, 2);
-			  //in addition to sending the API response, we should havea. placeholder message while the video buffersup
-			  var  videoResponse = "Your Livestream will start in a few seconds..."
-
-			  //finally - the iframecode is not an iframe, but for videojs
-			  iframecode = "iframe width='0' height='0' style='display:none'";
-
-			  console.log(iframecode);
-			  //we should not reyurn the page until broadcasting is true
-			  //but broadcasting cant be true until the camera starts - ehich requires the page!
-
- 
-			  return res.render('dashboardindex', { videoResponse, rtmpEndpoint, liveStreamManifest, liveResponse, useSandbox, productionAvailable});   	 		}
-		
-	}else{
-	    //reset to default image
-		iframecode = "img src="+placeholderImage;
-		var videoResponse = "When you upload a video, the API response will appear here."
-		//not live..just loading the page
-		console.log("default page", iframecode);
-		return res.render('dashboardindex', {iframecode, videoResponse, useSandbox, productionAvailable});
-	}
 	
   
 });

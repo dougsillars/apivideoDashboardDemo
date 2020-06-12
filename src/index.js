@@ -55,8 +55,7 @@ var apiVideoSandbox="";
 var apiVideoProduction = "";
 var productIdSandbox = "";
 var productIdProduction = "";
-var querySandbox;
-var queryProduction;
+
 
 //for the homepage demo - there is logic to serve streams from Canada.
 //by default it is EU
@@ -91,10 +90,7 @@ app.get('/dashboard', (req, res) => {
 		productIdSandbox = req.query.sandbox;
 		useSandbox=true;
 		console.log("sandbox", productIdSandbox);
-		querySandbox = {
-			name: "get sandbox apikey",
-			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdSandbox+'\''
-		}
+
 		
 	}
 	if(req.query.production){
@@ -104,18 +100,23 @@ app.get('/dashboard', (req, res) => {
 			//if prod is available - default is to stream and upload to prod
 			useSandbox=false;
 			console.log("productIdProduction", productIdProduction);
-			queryProduction = {
-				name: "get production apikey",
-				text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdProduction+'\''
-			}
+
 	}
 		//get sandbox key
+		const querySandbox = {
+			name: "get sandbox apikey",
+			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdSandbox+'\''
+		}
 		pool.query(querySandbox, (err, res) => {
 			console.log("response", res);
 			apiVideoSandbox = res.rows[0].values;
 			console.log("apiVideoSandbox", apiVideoSandbox);
 			pool.end;
 		//now get production key
+		const queryProduction = {
+			name: "get production apikey",
+			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdProduction+'\''
+		}
 			pool.query(queryProduction, (err, res) => {
 				apiVideoProduction = res.rows[0].values;
 				console.log("apiVideoProduction", apiVideoProduction);

@@ -110,7 +110,7 @@ app.get('/dashboard', (req, res) => {
 		console.log(querySandbox.text);
 
 		pool.query(querySandbox, (err, res) => {
-			console.log("response", res.rows[0].values);
+			console.log("sandbox key", res.rows[0].values);
 			apiVideoSandbox = res.rows[0].values;
 			console.log("apiVideoSandbox", apiVideoSandbox);
 			pool.end;
@@ -120,7 +120,7 @@ app.get('/dashboard', (req, res) => {
 			text:"SELECT value from public.api_key where project_id =\'" +productIdProduction+'\''
 		}
 			pool.query(queryProduction, (err, res1) => {
-				console.log("response", res1.rows[0].values);
+				console.log("prod key", res1.rows[0].values);
 				apiVideoProduction = res1.rows[0].values;
 				console.log("apiVideoProduction", apiVideoProduction);
 				pool.end;

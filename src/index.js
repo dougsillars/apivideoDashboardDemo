@@ -116,6 +116,13 @@ app.get('/dashboard', (req, res) => {
 			console.log("apiVideoSandbox", apiVideoSandbox);
 			//pool.end;
 		//now get production key
+
+		//if no production ID = use the test one
+		if  (productIdProduction == ""){
+			productIdProduction = productIdSandbox;
+
+		}
+
 		const queryProduction = {
 			name: "get production apikey",
 			text:"SELECT value from public.api_key where project_id =\'" +productIdProduction+'\''

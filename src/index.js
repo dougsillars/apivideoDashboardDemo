@@ -110,11 +110,11 @@ app.get('/dashboard', (req, res) => {
 		console.log(querySandbox.text);
 
 		pool.query(querySandbox, (err, res) => {
-			console.log("re", res);
+		//	console.log("re", res);
 			console.log("sandbox key", res.rows[0].value);
 			apiVideoSandbox = res.rows[0].value;
 			console.log("apiVideoSandbox", apiVideoSandbox);
-			pool.end;
+			//pool.end;
 		//now get production key
 		const queryProduction = {
 			name: "get production apikey",

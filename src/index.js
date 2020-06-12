@@ -107,6 +107,7 @@ app.get('/dashboard', (req, res) => {
 			name: "get sandbox apikey",
 			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdSandbox+'\''
 		}
+		console.log(querySandbox.text);
 		pool.query(querySandbox, (err, res) => {
             console.log(err,res);
             pool.end;

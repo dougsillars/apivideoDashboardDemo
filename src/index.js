@@ -29,8 +29,14 @@ const formidable = require('formidable')
 //email-validator to validate the email address
 var validator = require("email-validator");
 
-//mysql for the productID -> api key in the dashboard demo
-var mysql = require('mysql');
+//postgressql for the productID -> api key in the dashboard demo
+const pg = require('pg');
+const pool = new pg.Pool({
+	user: 'libcast',
+	host:'psql.api.video',
+	Schema:'public',
+	database:'subscription'
+});
 
 
 //ctreate timers to measure upload and processing timings
@@ -73,38 +79,38 @@ app.get('/dashboard', (req, res) => {
 	console.log("get index loaded", req.query);
 	var live = req.query.live;
 	
-	//get the apikeys - only needed on get for first load
+	//get the productIDs and convert to API keys - only needed on get for first load
 	//not present on subsequent loads...
+
+	//we only need to do this if there is a sandbox product ID GET param.  
+	//There is not a reason for there to be a prod but no sandbox.
 	if(req.query.sandbox){
-		//we got sandbox api key!!
+		//we got sandbox productID key!!
 		productIdSandbox = req.query.sandbox;
 		useSandbox=true;
 		console.log("sandbox", productIdSandbox);
-	}
-	if(req.query.production){
-		//we got prod api key
-		productIdProduction = req.query.production;
-		productionAvailable = true;
-		//if prod is available - default is to stream and upload to prod
-		useSandbox=false;
-		console.log("productIdProduction", productIdProduction);
-	}
+		const querySandbox = {
+			name: "get sandbox apikey",
+			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdSandbox+'\''
+		}
+		apiVideoSandbox = apiKeyQuery(querySandbox);
+	
+		if(req.query.production){
+			//we got prod productID key
+			productIdProduction = req.query.production;
+			productionAvailable = true;
+			//if prod is available - default is to stream and upload to prod
+			useSandbox=false;
+			console.log("productIdProduction", productIdProduction);
+			const queryProduction = {
+				name: "get production apikey",
+				text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdProduction+'\''
+			}
+			apiVideoProduction = apiKeyQuery(queryProduction);
+		}
+	}	
 
-	//now we have the productId for sand box and production
-	//lookup the api keys in the database
-	var con = mysql.createConnection({
-		host: "psql.api.video",
-		user: "libcast",
-		database: "subscription"
-	  });
-
-	  con.connect(function(err) {
-		if (err) throw err;
-		con.query("SELECT value from public.api_key where project_id = {$projectId}", function (err, result, fields) {
-		  if (err) throw err;
-		  console.log("sql query", result);
-		});
-	  });
+	
 	
 	//on subsequent loads - sandbox is chosen by the customer.
 	//use sandbox or prod
@@ -756,6 +762,15 @@ function streamPicker(streams, counter){
 	console.log("streamPicker stream chosen", chosenStream);
 	return chosenStream;
 	
+}
+
+function apiKeyQuery(query){
+    pool.query(query, (err, res) => {
+		var key = res.rows[0].values;
+		console.log("key", key);
+		pool.end;
+	});
+	return key;
 }
 
 

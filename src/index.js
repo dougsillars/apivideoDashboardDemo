@@ -752,14 +752,7 @@ io.on('error',function(e){
 	console.log('socket.io error:'+e);
 });
 
-
-
-
 //streaming stuff
-
-
-
-
 
 //testing on 3001
 server.listen(3001, () =>

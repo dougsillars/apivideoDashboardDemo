@@ -257,24 +257,25 @@ app.post('/dashboard', (req,res) =>{
     
 	//TODO form validation (mp4 file type, etc)
 	form.parse(req, (err, fields, files) => {
-    if (err) {
-		console.log(err);
-		next(err);
-		return;
-    }
+   		if (err) {
+			console.log(err);
+			next(err);
+			return;
+		}
+	});
 	//testing - writing fields and info on the file to the log
-   // console.log('Fields', fields);
-  //  console.log('Files', files.source);
-  //Just sandbox right now
+	   // console.log('Fields', fields);
+  	//  console.log('Files', files.source);
+  	//Just sandbox right now
 
-//use sandbox or prod
+	//use sandbox or prod
   
   
   
   
   
- console.log("fields ",fields); 
-console.log("fields livesandbox",fields.vodsandbox);
+ 	console.log("fields ",fields); 
+	console.log("fields livesandbox",fields.vodsandbox);
 if(fields.vodsandbox == "false"){
 	//use production
 	useSandbox = false;
@@ -374,7 +375,7 @@ if(useSandbox){
 
 
 });
-});
+
 
 // website demo
 //get request is the initial request - loads the start.pug

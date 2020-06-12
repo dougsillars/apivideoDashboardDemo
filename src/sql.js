@@ -1,5 +1,5 @@
     //mysql for the productID -> api key in the dashboard demo
-     var {Client} = require('pg');
+    const pg = require('pg');
     
      var productIdSandbox = "prUMsehoEjCfbzxl1eeV00I";
     //now we have the productId for sand box and production

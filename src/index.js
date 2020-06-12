@@ -120,7 +120,9 @@ app.get('/dashboard', (req, res) => {
 			name: "get production apikey",
 			text:"SELECT value from public.api_key where project_id =\'" +productIdProduction+'\''
 		}
+		console.log(queryProduction.text);
 			pool.query(queryProduction, (err, res1) => {
+				console.log("re", res1);
 				console.log("prod key", res1.rows[0].value);
 				apiVideoProduction = res1.rows[0].value;
 				console.log("apiVideoProduction", apiVideoProduction);

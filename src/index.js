@@ -112,15 +112,11 @@ app.get('/dashboard', (req, res) => {
 		apiVideoSandbox.then( function() {
 			apiVideoProduction = apiKeyQuery(queryProduction);
 			apiVideoProduction( function(){
-				//we have noth api keys now
+				//we have both api keys now
 				console.log("apiVideoSandbox", apiVideoSandbox);
 				console.log("apiVideoProduction", apiVideoProduction);
 
-
-
-
-
-
+				
 				//on subsequent loads - sandbox is chosen by the customer.
 				//use sandbox or prod
 				if(req.query.livesandbox == "false"){
@@ -756,9 +752,9 @@ io.on('error',function(e){
 
 
 
-
-server.listen(3001, () =>
-  console.log('Example app listening on port 3001!'),
+//testing on 3002
+server.listen(3002, () =>
+  console.log('Example app listening on port 3002!'),
 );
 process.on('uncaughtException', function(err) {
     // handle the error safely

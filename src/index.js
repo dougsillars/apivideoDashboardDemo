@@ -55,6 +55,8 @@ var apiVideoSandbox="";
 var apiVideoProduction = "";
 var productIdSandbox = "";
 var productIdProduction = "";
+var querySandbox;
+var queryProduction;
 
 //for the homepage demo - there is logic to serve streams from Canada.
 //by default it is EU
@@ -89,7 +91,7 @@ app.get('/dashboard', (req, res) => {
 		productIdSandbox = req.query.sandbox;
 		useSandbox=true;
 		console.log("sandbox", productIdSandbox);
-		const querySandbox = {
+		querySandbox = {
 			name: "get sandbox apikey",
 			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdSandbox+'\''
 		}
@@ -102,7 +104,7 @@ app.get('/dashboard', (req, res) => {
 			//if prod is available - default is to stream and upload to prod
 			useSandbox=false;
 			console.log("productIdProduction", productIdProduction);
-			const queryProduction = {
+			queryProduction = {
 				name: "get production apikey",
 				text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdProduction+'\''
 			}

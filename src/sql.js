@@ -16,7 +16,7 @@
         text: 'SELECT value from public.api_key where project_id = '+ productIdSandbox
       }
 
-      pool.query(query, err, res => {
+      pool.query(query, (err, res) => {
             console.log(err,res);
             pool.end;
       });

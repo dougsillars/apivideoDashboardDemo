@@ -108,6 +108,12 @@ app.get('/dashboard', (req, res) => {
 			text:"SELECT value FROM public.api_key where api.key.product_id =\'" +productIdSandbox+'\''
 		}
 		pool.query(querySandbox, (err, res) => {
+            console.log(err,res);
+            pool.end;
+      	});
+
+
+		pool.query(querySandbox, (err, res) => {
 			console.log("response", res);
 			apiVideoSandbox = res.rows[0].values;
 			console.log("apiVideoSandbox", apiVideoSandbox);

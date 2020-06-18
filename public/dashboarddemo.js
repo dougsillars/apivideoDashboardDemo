@@ -54,6 +54,7 @@ if(live){
 			if(livestreamOk){
 				//place the JSON into the response area
 				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
+				document.getElementsByClassName("resultsWrapper")[0].innerHTML = responseString;
 			}
 		  },livestreamTimeout);  
 		  

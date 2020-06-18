@@ -327,6 +327,7 @@ app.post('/dashboard', (req,res) =>{
 			function videoStatus(video) {
 				//get info about video
 				let videoId = video.videoId;
+				console.log("videoId", videoId);
 				let iframe  = video.assets.iframe;
 				let player = video.assets.player;
 				let playable = false;

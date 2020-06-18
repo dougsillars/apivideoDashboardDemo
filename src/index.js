@@ -333,7 +333,7 @@ app.post('/dashboard', (req,res) =>{
 					let iframe  = video.assets.iframe;
 					let player = video.assets.player;
 					let playable = false;
-					let status = client.videos.getStatus("vibtKJbtWwEjEL1OlItP45I");
+					let status = client.videos.getStatus(videoId);
 					status.then(function(videoStats){
 						//console.log('status', status);
 						//we have the video uploaded, now we need to wait for encoding to occur
@@ -366,7 +366,7 @@ app.post('/dashboard', (req,res) =>{
 						
 						
 					}).catch(function(error) {
-					console.error(error);
+					console.error("new video not found",error);
 					});	
 				}  
 			

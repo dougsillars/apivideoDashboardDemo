@@ -757,9 +757,9 @@ io.on('error',function(e){
 
 //streaming stuff
 
-//testing on 3002
-server.listen(3002, () =>
-  console.log('Example app listening on port 3002!'),
+//testing on 3001
+server.listen(3001, () =>
+  console.log('Example app listening on port 3001!'),
 );
 process.on('uncaughtException', function(err) {
     // handle the error safely

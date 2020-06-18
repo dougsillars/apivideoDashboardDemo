@@ -53,7 +53,7 @@ if(live){
 			//livestreamOk onlu fails if you dont give camera access - or if you use safarii
 			if(livestreamOk){
 				//place the JSON into the response area
-				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
+			//	document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
 				document.getElementsByClassName("resultsWrapper")[0].innerHTML = responseString;
 			}
 		  },livestreamTimeout);  

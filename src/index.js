@@ -292,8 +292,10 @@ app.post('/dashboard', (req,res) =>{
 		//now set the api client
 		if(useSandbox){
 			client = new apiVideo.Client({ apiKey: apiVideoSandbox});
+			console.log("sandbox client");
 		}else{
 			client = new apiVideo.Client({ apiKey: apiVideoProduction});
+			console.log("production client");
 		}
 
 
@@ -312,61 +314,61 @@ app.post('/dashboard', (req,res) =>{
 				console.log("upload complete", uploadCompleteTimer);
 				//console.log("video",video);
 				var videoJson = JSON.stringify(video, null, 2);
-			//delete file on node server
+				//delete file on node server
 				fs.unlink(files.source.path, function (err) {
 				if (err) throw err;
 				// if no error, file has been deleted successfully
 				console.log('File deleted!');
 				}); 
-			//video is uploaded, but not yet published.	
-			//check video status until it is published
-			//when video is playable return the video page
-			videoStatus(video);
+				//video is uploaded, but not yet published.	
+				//check video status until it is published
+				//when video is playable return the video page
+				videoStatus(video);
 				//this means that the video is now playable
 				//so load video.pug, to display the video to the user.
-			function videoStatus(video) {
-				//get info about video
-				let videoId = video.videoId;
-				console.log("videoId", videoId);
-				let iframe  = video.assets.iframe;
-				let player = video.assets.player;
-				let playable = false;
-				let status = client.videos.getStatus(videoId);
-				status.then(function(videoStats){
-					//console.log('status', status);
-					//we have the video uploaded, now we need to wait for encoding to occur
-					playable = videoStats.encoding.playable;
-					console.log('video playable?',videoStats.encoding.playable, playable);
-					if (playable){
-						//video is ready to be played
-						//and we can get the mp4 url now as well
-						console.log("ready to play the video");
-						playReadyTimer = Date.now();
-						let uploadSeconds = (uploadCompleteTimer-startUploadTimer)/1000;
-						let processSeconds = (playReadyTimer - uploadCompleteTimer)/1000;
-						console.log("video uploaded in: ", uploadSeconds);
-						console.log("video processed in: ", processSeconds);
-						//now we can get the MP4 url, and send the email and post the response
-						//now we add the tags to let zapier know it s ready to go
-						
-						var videoResponse = "<a href='"+player+"' target='_blank'> Your Video is ready!</a>";
-						console.log("videoResponse", videoResponse);
-						
-					
-					return res.render('dashboardindex', {videoResponse, useSandbox, productionAvailable});
+				function videoStatus(video) {
+					//get info about video
+					let videoId = video.videoId;
+					console.log("videoId", videoId);
+					let iframe  = video.assets.iframe;
+					let player = video.assets.player;
+					let playable = false;
+					let status = client.videos.getStatus("vibtKJbtWwEjEL1OlItP45I");
+					status.then(function(videoStats){
+						//console.log('status', status);
+						//we have the video uploaded, now we need to wait for encoding to occur
+						playable = videoStats.encoding.playable;
+						console.log('video playable?',videoStats.encoding.playable, playable);
+						if (playable){
+							//video is ready to be played
+							//and we can get the mp4 url now as well
+							console.log("ready to play the video");
+							playReadyTimer = Date.now();
+							let uploadSeconds = (uploadCompleteTimer-startUploadTimer)/1000;
+							let processSeconds = (playReadyTimer - uploadCompleteTimer)/1000;
+							console.log("video uploaded in: ", uploadSeconds);
+							console.log("video processed in: ", processSeconds);
+							//now we can get the MP4 url, and send the email and post the response
+							//now we add the tags to let zapier know it s ready to go
 							
-					}else{
-						//not ready so check again in 2 seconds.
-						console.log("not ready yet" );
-						setTimeout(videoStatus(video),2000);
-					}
+							var videoResponse = "<a href='"+player+"' target='_blank'> Your Video is ready!</a>";
+							console.log("videoResponse", videoResponse);
+							
+						
+						return res.render('dashboardindex', {videoResponse, useSandbox, productionAvailable});
+								
+						}else{
+							//not ready so check again in 2 seconds.
+							console.log("not ready yet" );
+							setTimeout(videoStatus(video),2000);
+						}
 
-					
-					
-				}).catch(function(error) {
-				console.error(error);
-				});;	
-			}  
+						
+						
+					}).catch(function(error) {
+					console.error(error);
+					});	
+				}  
 			
 			
 			

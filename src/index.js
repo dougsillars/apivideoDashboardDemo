@@ -310,6 +310,7 @@ app.post('/dashboard', (req,res) =>{
 			//see https://docs.api.video/5.1/videos/create-video
 			//for JSON details
 			result.then(function(video) {
+				let player = video.assets.player;
 				uploadCompleteTimer = Date.now();
 				console.log("upload complete", uploadCompleteTimer);
 				//console.log("video",video);

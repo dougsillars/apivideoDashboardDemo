@@ -321,27 +321,10 @@ app.post('/dashboard', (req,res) =>{
 				console.log('File deleted!');
 				}); 
 				//video is uploaded, but not yet published.	
-				//check video status until it is published
-				//when video is playable return the video page
-				videoStatus(video);
-				//this means that the video is now playable
-				//so load video.pug, to display the video to the user.
-				function videoStatus(video) {
-					//get info about video
-					let videoId = video.videoId;
-					console.log("videoId", videoId);
-					let iframe  = video.assets.iframe;
-					let player = video.assets.player;
-					let playable = false;
-					let status = client.videos.getStatus(videoId);
-					status.then(function(videoStats){
-						//console.log('status', status);
-						//we have the video uploaded, now we need to wait for encoding to occur
-						playable = videoStats.encoding.playable;
-						console.log('video playable?',videoStats.encoding.playable, playable);
-						if (playable){
-							//video is ready to be played
-							//and we can get the mp4 url now as well
+
+						//in the dashboard, wre dont actually care if it is published yet
+						//by the time they hit the link it should be ready
+						//pulling the check for playable since it fails in sandbox
 							console.log("ready to play the video");
 							playReadyTimer = Date.now();
 							let uploadSeconds = (uploadCompleteTimer-startUploadTimer)/1000;
@@ -357,23 +340,8 @@ app.post('/dashboard', (req,res) =>{
 						
 						return res.render('dashboardindex', {videoResponse, useSandbox, productionAvailable});
 								
-						}else{
-							//not ready so check again in 2 seconds.
-							console.log("not ready yet" );
-							setTimeout(videoStatus(video),2000);
-						}
-
-						
-						
-					}).catch(function(error) {
-					console.error("new video not found",error);
-					});	
-				}  
-			
-			
-			
-			
-			
+		
+	
 			//if upload fails  
 			}).catch(function(error) {
 			console.error(error);

@@ -422,7 +422,7 @@ app.get('/', (req, res) => {
 				
 				//use this endpoint *just* for the website demo
 				console.log("hostName", hostName);
-				if(hostName == "MacBook-Pro.broadband"){
+				if(hostName == "MacBook-Pro"){
 					rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
 					
 				} else{

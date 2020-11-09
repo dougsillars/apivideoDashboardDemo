@@ -7,7 +7,7 @@ var framerate = 10;
 var audioBitrate = 11025;
 var width = 240;
 var height = 240;
-var livestreamTimeout = 15000;
+var livestreamTimeout = 1000;
 var livestreamOk = true;
 
 
@@ -71,6 +71,7 @@ if(live){
 			//videoRefresh.appendChild(refreshButton); 
 
 			videoRefresh.addEventListener('click', function(){
+				videoRefresh.className = "videoRefreshClick";
 				//refresh the video player
 				console.log("window.player",window.player);
 				var iframeList = document.getElementsByTagName('iframe');
@@ -78,9 +79,14 @@ if(live){
 				
 				iframeList[1].id = "liveVideoiframe";
 				console.log("iframeList1", iframeList[1]);
+				iframeList[1].contentWindow.location.reload(true);
 				//adding empty space causes iframe to reload
-				document.getElementById("liveVideoiframe").src +='';
+				document.getElementById("liveVideoiframe").src +=' ';
+				setTimeout(function(){
+					videoRefresh.className = "videoRefresh";
+				  },100);
 				
+				;
 			}
 			);
 

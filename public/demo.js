@@ -47,7 +47,7 @@ if(live){
 			console.log("jsonResponse",jsonResponse);
 			//add player
 			//No match found for selector result__videoWrapper
-	        window.player = apiVideoSdk.create("#liveVideo", { 
+	        window.player = new PlayerSdk("#liveVideo", { 
 	            id: videoId, 
 	            live: true,
 				autoplay:true,
@@ -114,7 +114,7 @@ function dropVideo(){
 
 	;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
 		dropArea.addEventListener(eventName, preventDefaults, false);
-		console.log("prevented defauls");
+		console.log("prevented defaults");
 	})
 
 	function preventDefaults (e) {

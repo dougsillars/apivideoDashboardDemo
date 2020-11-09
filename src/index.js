@@ -37,7 +37,7 @@ const pool = new pg.Pool({
 	Schema:'public',
 	database:'subscription'
 });
-
+var myVideos = "https://go.api.video/user/change-env?env=sandbox";
 
 //ctreate timers to measure upload and processing timings
     let startUploadTimer;
@@ -71,7 +71,9 @@ var client = new apiVideo.Client({ apiKey: apiVideoSandbox});
 
 
 
-
+app.get('/dashboarddesign',(req, res) => {
+	return res.render('dashboardindex');
+});
 
 
 //get request is the initial request - loads the start.pug
@@ -254,7 +256,7 @@ app.post('/dashboard', (req,res) =>{
 
     //formidable reads the form
 	var form = new formidable.IncomingForm({maxFileSize : 2000 * 1024 * 1024}); //2 Gb
-	//console.log("form",form);
+	console.log("form",form);
 	//use .env feil to set the directory for the video uploads
 	//since we will be deleting the files after they uplaod to api.video
 	//make sure this directory is full write and delete
@@ -270,7 +272,7 @@ app.post('/dashboard', (req,res) =>{
 	
 		//testing - writing fields and info on the file to the log
 		// console.log('Fields', fields);
-		//  console.log('Files', files.source);
+		  console.log('Files', files.source);
 		//Just sandbox right now
 
 		//use sandbox or prod
@@ -293,9 +295,13 @@ app.post('/dashboard', (req,res) =>{
 		if(useSandbox){
 			client = new apiVideo.Client({ apiKey: apiVideoSandbox});
 			console.log("sandbox client");
+			//my videos url
+			myVideos = "https://go.api.video/user/change-env?env=sandbox";
+			
 		}else{
 			client = new apiVideo.Client({ apiKey: apiVideoProduction});
 			console.log("production client");
+			myVideos = "https://go.api.video/user/change-env?env=production";
 		}
 
 
@@ -335,7 +341,7 @@ app.post('/dashboard', (req,res) =>{
 							//now we can get the MP4 url, and send the email and post the response
 							//now we add the tags to let zapier know it s ready to go
 							
-							var videoResponse = "<a href='"+player+"' target='_blank'> Your Video is ready!</a>";
+							var videoResponse = "Your video has been successfully uploaded, you can now manage it in <a href='"+myVideos+"' target='_blank'>my videos.</a>";
 							console.log("videoResponse", videoResponse);
 							
 						
@@ -381,20 +387,17 @@ app.get('/', (req, res) => {
 		var hostName = os.hostname();
 		console.log("hostName", hostName);
 		
-		//there are 10 enpoints in EU with the name "live"
-		//this is the default
+		//there are 10 enpoints in EU with the name "live" - this is the default
 		var nameSearch = "live";
 		//there are 10 endpoints in NA with the name Canada
 		//if using canada server, use the to canada endpoints 
 		if (hostName == canadaHost){
-			//host ins in canada
-			//search for streams with name canada
+			//host ins in canada - search for streams with name canada
 			nameSearch = "canada";
 		}
 		
-		
 		console.log("nameSearch", nameSearch);
-		//
+		//get the list of streams in EU or in Canada
 		let streamList = client.lives.search({"name": nameSearch});	
 		streamList.then(function(streams) {
 			//console.log(streams);
@@ -419,7 +422,7 @@ app.get('/', (req, res) => {
 				
 				//use this endpoint *just* for the website demo
 				console.log("hostName", hostName);
-				if(hostName == "Dougs-MBP"){
+				if(hostName == "MacBook-Pro.broadband"){
 					rtmpEndpoint = "rtmp://broadcast.api.video/s/"+streamKey;
 					
 				} else{
@@ -532,11 +535,14 @@ app.post('/', (req,res) =>{
 		let player = video.assets.player;
 	  	let playable = false;
 	  	let status = client.videos.getStatus(videoId);
+		
 	      status.then(function(videoStats){
+			  console.log(videoStats);
 	      	//console.log('status', status);
 			//we have the video uploaded, now we need to wait for encoding to occur
 	  		playable = videoStats.encoding.playable;
 	  		console.log('video playable?',videoStats.encoding.playable, playable);
+			console.log('current Time', Date.now());
 	  		if (playable){
 	  			//video is ready to be played
 				//and we can get the mp4 url now as well
@@ -561,7 +567,7 @@ app.post('/', (req,res) =>{
 	  		}else{
 	  			//not ready so check again in 2 seconds.
 	  			console.log("not ready yet" );
-	  			setTimeout(videoStatus(video),2000);
+	  			setTimeout(videoStatus,2000,video);
 	  		}
 
 			
@@ -726,7 +732,7 @@ io.on('error',function(e){
 
 //streaming stuff
 
-//testing on 3001
+//testing on 3002
 server.listen(3001, () =>
   console.log('Example app listening on port 3001!'),
 );
@@ -742,13 +748,16 @@ function streamPicker(streams, counter){
 	let streamCount = streams.length;
 	//console.log(streams);
 	console.log("streamcount", streamCount);
-	let randomNumber = Math.floor(Math.random()*streamCount);
-	console.log("is broadcasting: ", streams[randomNumber].broadcasting);
+	//let randomNumber = Math.floor(Math.random()*streamCount);
+	//console.log("is broadcasting: ", streams[randomNumber].broadcasting);
 	//console.log("streampicking", streams[randomNumber]);
 	for(var i=0;i<streamCount;i++){
+		console.log("stream " + i +" broadcasting: "+ streams[i].broadcasting);
+		
 		if(!streams[i].broadcasting){
 			//not broadcasting, choose this one
 			chosenStream = i;
+			break;
 		}
 	}
 	

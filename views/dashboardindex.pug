@@ -10,7 +10,7 @@ body
 
    .topRow
       .getStarted(class = "getStarted")
-         | Get Started
+         | Test out your API
       .action_environment
           #sandboxDiv Sandbox
           #productionDiv Production
@@ -21,11 +21,14 @@ body
      p !{videoResponse}
    .vodOrLiveRow  
     .action__upload(id='action__upload')
+        
+          
         form(id='upload',name='uploadForm',action='dashboard' ,method = 'POST',  enctype="multipart/form-data")
           input(id='vodsandbox',type='text', name = "vodsandbox", value="true",style='display:none')
-          label(for='file', class="uploadFile")
+
+          label(for='file', class="uploadFile")          
            .uploadFile__icon
-            img(draggable="false", src="upload.png", alt="")
+            img(draggable="false", width="50px", src="upload.png", alt="")
            .uploadFile__content
             span(style="font-size: 18px;") <b>Upload</b><br/><br/>
             span(class='uploadFile__content__desc')  Drop a video here or <b>click to browse</b> for a file (max 100mb)
@@ -36,7 +39,7 @@ body
           input(id='livetext',type='text', name = "live", value="true",style='display:none')
           input(id='livesandbox',type='text', name = "livesandbox", value="true",style='display:none')
           span(style="font-size: 18px;") <b>Livestream</b><br/><br/>
-          span(class='uploadFile__content__desc') Start live streaming from your cam<br/>
+          span(class='uploadFile__content__desc') Start live streaming from your webcam (Chrome and Firefox only). <br/><br/>
           input(type="submit", class="liveButton" name="livestream", value ='Start' onclick='initiateLivestream();')
 
   #liveTest

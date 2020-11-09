@@ -1,6 +1,7 @@
 const queryString = window.location.search;
 console.log(queryString);
 const urlParams = new URLSearchParams(queryString);
+
 const live = urlParams.get('live');
 console.log("live?",live);
 var framerate = 10;
@@ -9,6 +10,19 @@ var width = 240;
 var height = 240;
 var livestreamTimeout = 15000;
 var livestreamOk = true;
+const prodDelegatedUrl ="https://ws.api.video/upload?token=to2XNb3D97DN6KkLgaEyKZ0k";
+//vod variables
+var chunkCounter =0;
+//break into 10 MB chunks 
+const chunkSize = 10000000;  
+var videoId = "";
+var playerUrl = "";
+var start =0; 
+var chunkEnd = start + chunkSize;
+var filename= "";
+var fileSize="";
+var numberofChunks = 1;
+var file;
 
 
 if(live){
@@ -18,7 +32,7 @@ if(live){
  	var socket;
 	
 	var state ="stop";
-	console.log("state initiated = " +state); 
+	//console.log("state initiated = " +state); 
 	connect_server();
    
     
@@ -27,8 +41,7 @@ if(live){
     window.onload = function(){
 		//dragand drop for live
 		dropVideo();
-		//style radio buttons
-		radioButton();
+	
 		
     //define the video player  and url 
     //only start the live player X seconds after starting recording
@@ -44,116 +57,164 @@ if(live){
 			//liveManifest https://live.api.video/li2kvDGqdxa0q5AsOOBaGA1k.m3u8  
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
-			var playerUrl = jsonResponse.assets.player;
-			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>. NOTE: This is a low fidelity livestream for testing purposes. Please do not use in production.";
-			console.log("videoId",videoId);
-	
-				
+			console.log("jsonResponse",jsonResponse);
+			//add player
+			//No match found for selector result__videoWrapper
+	        window.player = new PlayerSdk("#liveVideo", { 
+	            id: videoId, 
+	            live: true,
+				autoplay:true,
+				muted:true 
+	        });
+			
 			//now we can enter the livestream JSON response... but only if the playback is ok
 			//livestreamOk onlu fails if you dont give camera access - or if you use safarii
 			if(livestreamOk){
 				//place the JSON into the response area
-			//	document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
-				document.getElementsByClassName("resultsWrapper")[0].innerHTML = responseString;
+				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
 			}
-		  },livestreamTimeout);  
-		  
-		  
+			//sometimes there is an error with video startup
+			//and the  livestreamTimeout was not long enough.
+			//insert a button to reload the video player
+			//so we'll add a button that reloads the player
 
+			var video = document.getElementById("videoRefresh");
+			videoRefresh.innerHTML= "Refresh Live Video";
+			videoRefresh.className = "videoRefresh";
+			//videoRefresh.appendChild(refreshButton); 
 
+			videoRefresh.addEventListener('click', function(){
+				//refresh the video player by destroying and recreating it.
+				player.destroy();
+				console.log("destroyed");
+		        window.player = new PlayerSdk("#liveVideo", { 
+		            id: videoId, 
+		            live: true,
+					autoplay:true,
+					muted:true 
+		        });
+				console.log("recreated");
+				//this is the old way, that was problematic
+				/*console.log("window.player",window.player);
+				var iframeList = document.getElementsByTagName('iframe');
+				console.log("iframeList", iframeList);
+				
+				iframeList[1].id = "liveVideoiframe";
+				console.log("iframeList1", iframeList[1]);
+				//adding empty space causes iframe to reload
+				document.getElementById("liveVideoiframe").src +=' ';
+				*/
+			}
+			);
+
+          },livestreamTimeout);  
 	  }
 	
 	
 
 }else{
 	
-	//not live
+	//not live - either initial load or VOD
 	window.onload = function(){
-		
-
-		radioButton();
-   		dropVideo();
+		dropVideo();
 	}
 		
 }
 
 
-function radioButton(){
-	var useSandbox = document.getElementById("useSandbox").innerHTML;
-	useSandbox = useSandbox.trim();
-	var productionAvailable = document.getElementById("productionAvailable").innerHTML;
-	productionAvailable = productionAvailable.trim();
-	console.log("useSandbox", useSandbox, typeof(useSandbox), useSandbox.length);
-	
-	if(useSandbox === "true"){
-		document.getElementById("sandbox").checked = "true";
-		console.log("checking sandbox radio");
-		document.getElementById("vodsandbox").value="true";
-		document.getElementById("livesandbox").value="true";
+///vod
 
-		document.getElementById("sandboxDiv").className="sandboxActive";
-		document.getElementById("productionDiv").className="production";
-	}else if(useSandbox === "false"){
-		//productiion
-		document.getElementById("production").checked = "true";
-		console.log("checking prod radio");
-		document.getElementById("vodsandbox").value="false";
-		document.getElementById("livesandbox").value="false";
-
-		document.getElementById("sandboxDiv").className="sandbox";
-		document.getElementById("productionDiv").className="productionActive";
+function createChunk(videoId, file, start, end){
+	chunkCounter++;
+	console.log("created chunk: ", chunkCounter);
+	chunkEnd = Math.min(start + chunkSize , file.size );
+	filename = file.name;
+	fileSize = file.size;
+	console.log("filesize  written",filename+ fileSize);
+	numberofChunks = Math.ceil(fileSize/chunkSize);
+	const chunk = file.slice(start, chunkEnd);
+	console.log("i created a chunk of video" + start + "-" + chunkEnd + "minus 1	");
+  	const chunkForm = new FormData();
+	if(videoId.length >0){
+		//we have a videoId
+		chunkForm.append('videoId', videoId);
+		console.log("added videoId");	
+		
 	}
-	if(productionAvailable ==="false"){
-		//disable the prodction radio button
-		document.getElementById("production").disabled = "true";
-		document.getElementsByClassName("production")[0].style.color = "gray";
+  	chunkForm.append('file', chunk, filename);
+	console.log("added file");
+
+	
+	//created the chunk, now upload iit
+	uploadChunk(chunkForm, start, chunkEnd);
+}
+
+function uploadChunk(chunkForm, start, chunkEnd){
+	var oReq = new XMLHttpRequest();
+	oReq.upload.addEventListener("progress", updateProgress);	
+	oReq.open("POST", prodDelegatedUrl, true);
+	var blobEnd = chunkEnd-1;
+	var contentRange = "bytes "+ start+"-"+ blobEnd+"/"+fileSize;
+	oReq.setRequestHeader("Content-Range",contentRange);
+	console.log("Content-Range", contentRange);
+	function updateProgress (oEvent) {
+	    if (oEvent.lengthComputable) {  
+	    var percentComplete = Math.round(oEvent.loaded / oEvent.total * 100);
+		
+		var totalPercentComplete = Math.round((chunkCounter -1)/numberofChunks*100 +percentComplete/numberofChunks);
+	    document.getElementsByClassName("result__server__body")[0].innerHTML = "Chunk # " + chunkCounter + " is " + percentComplete + "% uploaded. Total uploaded: " + totalPercentComplete +"%";
+		//console.log (percentComplete);
+		// ...
+	  } else {
+		  console.log ("not computable");
+	    // Unable to compute progress information since the total size is unknown
+	  }
 	}
-	
-	//now - what if the default was overridden by the user
-	
-	var radioSandbox = document.getElementById("sandboxDiv");
-	var radioProduction = document.getElementById("productionDiv");
-	radioSandbox.addEventListener('click', function(){
-		document.getElementById("sandbox").checked = "true";
-		console.log("checking sandbox radio");
-		document.getElementById("vodsandbox").value="true";
-		document.getElementById("livesandbox").value="true";
-		console.log("sandbox clicked");
+	oReq.onload = function (oEvent) {
+	               // Uploaded.
+					console.log("uploaded chunk" );
+					console.log("oReq.response", oReq.response);
+					var resp = JSON.parse(oReq.response)
+					videoId = resp.videoId;
+					//playerUrl = resp.assets.player;
+					console.log("videoId",videoId);
+					
+					//now we have the video ID - loop through and add the remaining chunks
+					//we start one chunk in, as we have uploaded the first one.
+					//next chunk starts at + chunkSize from start
+					start += chunkSize;	
+					console.log("start+ filesize",start+ " " +fileSize)
+					chunkEnd = Math.min(start + chunkSize , fileSize );
+					//if start is smaller than file size - we have more to still upload
+					if(start<fileSize){
+						//create the new chunk
+						createChunk(videoId, chunkForm, start, chunkEnd);
+					}
+					else{
+						//the video is fully uploaded. there will now be a url in the response
+						console.log(JSON.stringify(resp));
+						playerUrl = resp.assets.player;
+						console.log("all uploaded! Watch here: ",playerUrl ) ;
+						
+						
+						document.getElementsByClassName("result__server__body")[0].innerHTML = JSON.stringify(resp) ;
+						document.getElementsByClassName("result__videoWrapper")[0].innerHTML = "<iframe id='videoPlayer' src='"+playerUrl+"#autoplay' height='100%' width='100%' crossorgin='anonymous'>"
+					}
+					
+	  };
+	  oReq.send(chunkForm);
 
-		document.getElementById("sandboxDiv").className="sandboxActive";
-		document.getElementById("productionDiv").className="production";
-	});
 	
-		
-		
-	    //only change stuff to productionif production is possible
-	    if(productionAvailable ==="true"){
-			radioProduction.addEventListener('click', function(){
-				document.getElementById("production").checked = "true";
-				console.log("checking prod radio");
-				document.getElementById("vodsandbox").value="false";
-				document.getElementById("livesandbox").value="false";
-				console.log("prod clicked");
-
-				document.getElementById("sandboxDiv").className="sandbox";
-				document.getElementById("productionDiv").className="productionActive";
-			});
-		}else{
-			radioProduction.addEventListener('click', function(){
-			//production is not available
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML = "To run this demo in production, you must enter a credit card";
-			});
-		}
-		
-		
 	
 }
+
+
  
 function dropVideo(){
 	
 	let dropArea = document.getElementsByClassName("action__upload")[0];
-	console.log(dropArea);
-
+	
+     //prevent defaults on drop area
 	dropArea.addEventListener('dragenter', preventDefaults, false);
 	dropArea.addEventListener('dragleave', preventDefaults, false);
 	dropArea.addEventListener('dragover', preventDefaults, false);
@@ -164,37 +225,27 @@ function dropVideo(){
 		console.log("prevented defaults");
 	})
 
+
 	function preventDefaults (e) {
 	  e.preventDefault()
 	  e.stopPropagation()
 	}
-
+	//if there is a dropped file
 	dropArea.addEventListener('drop', handleDrop, false);
-
 	function handleDrop(e) {
 		let dt = e.dataTransfer;
 		console.log("dt", dt);
-		
+		start =0;
+		var chunkEnd = start + chunkSize;
 		//the drop gives me a file list
-		let fileList = dt.files;
-		console.log("filelist?",fileList);
-   	 	//just do the form here
-		var fileElement = document.getElementById("file");
-		//var newFileList = new FileList();
-		fileElement.files =fileList ;
-		console.log("fileElement", fileElement.files);
-		//var upload = document.getElementById('upload');
-		
-		
-	
-        uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
+		file = dt.files[0];
+		console.log("filelist?",file);
+   	 	
+		//send this file to createChunk
+		createChunk(videoId, file, start, chunkEnd);
 	 
 	  }
   }
-		
-	
-	
-	
 
 
 
@@ -204,16 +255,16 @@ function dropVideo(){
     //get VOD video to upload
 	 const fileElement = document.getElementById('file');
 	 fileElement.click();
+	 console.log('click');
 	//upload file to NodeJS for upload to api.video
 	fileElement.addEventListener("change", function() {	
 		console.log("fileslist", fileElement.files);
 	    console.log("file selected", document.getElementById('file').files[0]);
-		uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
-		 
+		//uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
+		uploadVideo(uploadForm);
 		});
-    //send to Node server to uploa
-	console.log('done');
-};
+
+}
 
  function initiateLivestream() {
 	 //set up livestream
@@ -257,13 +308,14 @@ function show_output(str){
 	function connect_server(){
 
 		var socketio_address = "/";
-		console.log("connect server started");
+		//console.log("connect server started");
 		navigator.getUserMedia = (navigator.mediaDevices.getUserMedia ||
                           navigator.mediaDevices.mozGetUserMedia ||
                           navigator.mediaDevices.msGetUserMedia ||
-                          navigator.mediaDevices.webkitGetUserMedia);
+						  navigator.mediaDevices.webkitGetUserMedia);
+		console.log("navigator.getUserMedia", navigator.getUserMedia);
 		if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
-	//	if(!MediaRecorder){fail('No MediaRecorder available.');}
+		
         
 		var socketOptions = {secure: true, reconnection: true, reconnectionDelay: 1000, timeout:15000, pingTimeout: 			15000, pingInterval: 45000,query: {framespersecond: framerate, audioBitrate: audioBitrate}};
 		
@@ -329,8 +381,8 @@ function show_output(str){
 			console.log('ERROR: server disconnected!' +reason);
 			
 			//error message to users
-			//document.getElementsByClassName("resultsWrapper")[0].innerHTML
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
+			//document.getElementsByClassName("result__server__body")[0].innerHTML
+			document.getElementsByClassName("result__server__body")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
 					
 	
 		});
@@ -349,12 +401,12 @@ function requestMedia(){
 	*/
 	console.log("request media");
 	var constraints = { audio: {sampleRate: audioBitrate},
-		video:{
-	        width: { min: 100, ideal: width, max: 1920 },
-	        height: { min: 100, ideal: height, max: 1080 },
-			frameRate: {ideal: framerate}
-	    }
-	};
+						video:{
+		        			width: { min: 100, ideal: width, max: 1920 },
+		       			 	height: { min: 100, ideal: height, max: 1080 },
+		        			frameRate: {ideal: framerate}
+		    			}
+					};
 	console.log(constraints);
 	navigator.getUserMedia = (navigator.mediaDevices.getUserMedia ||
                       navigator.mediaDevices.mozGetUserMedia ||
@@ -414,13 +466,12 @@ function requestMedia(){
 		console.log(err);
 		var error ="unknown";
 		var errorMessage = "Sorry, an unknown error occurred.";
-		var blackbox = document.getElementsByClassName("resultsWrapper");
-		//there is only one element with the class resultsWrapper
+		var blackbox = document.getElementsByClassName("result__server__body");
+		//there is only one element with the class result__server__body
 		if(err.message){
 			error = err.message;
 		}
-		
-		
+		console.log("error", error);
 		if(error.includes("MediaRecorder")){
 			console.log("error", error);
 			//getUserMedia is not supported in the browser (probably safari)
@@ -429,10 +480,12 @@ function requestMedia(){
 			errorMessage="Sorry, but you must allow camera and microphone access to record video.";
 			
 		}
-				//livestream is not ok :(
-					livestreamOk = false;
+		//livestream is not ok :(
+		livestreamOk = false;
+		console.log("errorMessage", errorMessage);
 		blackbox[0].innerHTML=errorMessage;
 		 state="stop";
+		 stopStream;
 		
 	});
 }

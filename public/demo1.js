@@ -11,6 +11,7 @@ var livestreamTimeout = 15000;
 var livestreamOk = true;
 
 
+
 if(live){
 	
 	var mediaRecorder;
@@ -18,7 +19,7 @@ if(live){
  	var socket;
 	
 	var state ="stop";
-	console.log("state initiated = " +state); 
+	//console.log("state initiated = " +state); 
 	connect_server();
    
     
@@ -27,8 +28,7 @@ if(live){
     window.onload = function(){
 		//dragand drop for live
 		dropVideo();
-		//style radio buttons
-		radioButton();
+	
 		
     //define the video player  and url 
     //only start the live player X seconds after starting recording
@@ -44,23 +44,47 @@ if(live){
 			//liveManifest https://live.api.video/li2kvDGqdxa0q5AsOOBaGA1k.m3u8  
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
-			var playerUrl = jsonResponse.assets.player;
-			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>. NOTE: This is a low fidelity livestream for testing purposes. Please do not use in production.";
-			console.log("videoId",videoId);
-	
-				
+			console.log("jsonResponse",jsonResponse);
+			//add player
+			//No match found for selector result__videoWrapper
+	        window.player = apiVideoSdk.create("#liveVideo", { 
+	            id: videoId, 
+	            live: true,
+				autoplay:true,
+				muted:true 
+	        });
+			
 			//now we can enter the livestream JSON response... but only if the playback is ok
 			//livestreamOk onlu fails if you dont give camera access - or if you use safarii
 			if(livestreamOk){
 				//place the JSON into the response area
-			//	document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
-				document.getElementsByClassName("resultsWrapper")[0].innerHTML = responseString;
+				document.getElementsByClassName("result__server__body")[0].innerHTML = liveResponse;
 			}
-		  },livestreamTimeout);  
-		  
-		  
+			//sometimes there is an error with video startup
+			//and the  livestreamTimeout was not long enough.
+			//insert a button to reload the video player
+			//so we'll add a button that reloads the player
 
+			var videoRefresh = document.getElementById("videoRefresh");
+			videoRefresh.innerHTML= "Refresh Live Video";
+			videoRefresh.className = "videoRefresh";
+			//videoRefresh.appendChild(refreshButton); 
 
+			videoRefresh.addEventListener('click', function(){
+				//refresh the video player
+				console.log("window.player",window.player);
+				var iframeList = document.getElementsByTagName('iframe');
+				console.log("iframeList", iframeList);
+				
+				iframeList[1].id = "liveVideoiframe";
+				console.log("iframeList1", iframeList[1]);
+				//adding empty space causes iframe to reload
+				document.getElementById("liveVideoiframe").src +='';
+				
+			}
+			);
+
+          },livestreamTimeout);  
 	  }
 	
 	
@@ -69,85 +93,14 @@ if(live){
 	
 	//not live
 	window.onload = function(){
+		   dropVideo();
+	
 		
-
-		radioButton();
-   		dropVideo();
 	}
 		
 }
 
 
-function radioButton(){
-	var useSandbox = document.getElementById("useSandbox").innerHTML;
-	useSandbox = useSandbox.trim();
-	var productionAvailable = document.getElementById("productionAvailable").innerHTML;
-	productionAvailable = productionAvailable.trim();
-	console.log("useSandbox", useSandbox, typeof(useSandbox), useSandbox.length);
-	
-	if(useSandbox === "true"){
-		document.getElementById("sandbox").checked = "true";
-		console.log("checking sandbox radio");
-		document.getElementById("vodsandbox").value="true";
-		document.getElementById("livesandbox").value="true";
-
-		document.getElementById("sandboxDiv").className="sandboxActive";
-		document.getElementById("productionDiv").className="production";
-	}else if(useSandbox === "false"){
-		//productiion
-		document.getElementById("production").checked = "true";
-		console.log("checking prod radio");
-		document.getElementById("vodsandbox").value="false";
-		document.getElementById("livesandbox").value="false";
-
-		document.getElementById("sandboxDiv").className="sandbox";
-		document.getElementById("productionDiv").className="productionActive";
-	}
-	if(productionAvailable ==="false"){
-		//disable the prodction radio button
-		document.getElementById("production").disabled = "true";
-		document.getElementsByClassName("production")[0].style.color = "gray";
-	}
-	
-	//now - what if the default was overridden by the user
-	
-	var radioSandbox = document.getElementById("sandboxDiv");
-	var radioProduction = document.getElementById("productionDiv");
-	radioSandbox.addEventListener('click', function(){
-		document.getElementById("sandbox").checked = "true";
-		console.log("checking sandbox radio");
-		document.getElementById("vodsandbox").value="true";
-		document.getElementById("livesandbox").value="true";
-		console.log("sandbox clicked");
-
-		document.getElementById("sandboxDiv").className="sandboxActive";
-		document.getElementById("productionDiv").className="production";
-	});
-	
-		
-		
-	    //only change stuff to productionif production is possible
-	    if(productionAvailable ==="true"){
-			radioProduction.addEventListener('click', function(){
-				document.getElementById("production").checked = "true";
-				console.log("checking prod radio");
-				document.getElementById("vodsandbox").value="false";
-				document.getElementById("livesandbox").value="false";
-				console.log("prod clicked");
-
-				document.getElementById("sandboxDiv").className="sandbox";
-				document.getElementById("productionDiv").className="productionActive";
-			});
-		}else{
-			radioProduction.addEventListener('click', function(){
-			//production is not available
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML = "To run this demo in production, you must enter a credit card";
-			});
-		}
-		
-		
-	
-}
  
 function dropVideo(){
 	
@@ -161,7 +114,7 @@ function dropVideo(){
 
 	;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
 		dropArea.addEventListener(eventName, preventDefaults, false);
-		console.log("prevented defaults");
+		console.log("prevented defauls");
 	})
 
 	function preventDefaults (e) {
@@ -185,8 +138,6 @@ function dropVideo(){
 		console.log("fileElement", fileElement.files);
 		//var upload = document.getElementById('upload');
 		
-		
-	
         uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
 	 
 	  }
@@ -257,13 +208,14 @@ function show_output(str){
 	function connect_server(){
 
 		var socketio_address = "/";
-		console.log("connect server started");
+		//console.log("connect server started");
 		navigator.getUserMedia = (navigator.mediaDevices.getUserMedia ||
                           navigator.mediaDevices.mozGetUserMedia ||
                           navigator.mediaDevices.msGetUserMedia ||
-                          navigator.mediaDevices.webkitGetUserMedia);
+						  navigator.mediaDevices.webkitGetUserMedia);
+		console.log("navigator.getUserMedia", navigator.getUserMedia);
 		if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
-	//	if(!MediaRecorder){fail('No MediaRecorder available.');}
+		
         
 		var socketOptions = {secure: true, reconnection: true, reconnectionDelay: 1000, timeout:15000, pingTimeout: 			15000, pingInterval: 45000,query: {framespersecond: framerate, audioBitrate: audioBitrate}};
 		
@@ -329,8 +281,8 @@ function show_output(str){
 			console.log('ERROR: server disconnected!' +reason);
 			
 			//error message to users
-			//document.getElementsByClassName("resultsWrapper")[0].innerHTML
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
+			//document.getElementsByClassName("result__server__body")[0].innerHTML
+			document.getElementsByClassName("result__server__body")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
 					
 	
 		});
@@ -349,12 +301,12 @@ function requestMedia(){
 	*/
 	console.log("request media");
 	var constraints = { audio: {sampleRate: audioBitrate},
-		video:{
-	        width: { min: 100, ideal: width, max: 1920 },
-	        height: { min: 100, ideal: height, max: 1080 },
-			frameRate: {ideal: framerate}
-	    }
-	};
+						video:{
+		        			width: { min: 100, ideal: width, max: 1920 },
+		       			 	height: { min: 100, ideal: height, max: 1080 },
+		        			frameRate: {ideal: framerate}
+		    			}
+					};
 	console.log(constraints);
 	navigator.getUserMedia = (navigator.mediaDevices.getUserMedia ||
                       navigator.mediaDevices.mozGetUserMedia ||
@@ -414,13 +366,12 @@ function requestMedia(){
 		console.log(err);
 		var error ="unknown";
 		var errorMessage = "Sorry, an unknown error occurred.";
-		var blackbox = document.getElementsByClassName("resultsWrapper");
-		//there is only one element with the class resultsWrapper
+		var blackbox = document.getElementsByClassName("result__server__body");
+		//there is only one element with the class result__server__body
 		if(err.message){
 			error = err.message;
 		}
-		
-		
+		console.log("error", error);
 		if(error.includes("MediaRecorder")){
 			console.log("error", error);
 			//getUserMedia is not supported in the browser (probably safari)
@@ -429,10 +380,12 @@ function requestMedia(){
 			errorMessage="Sorry, but you must allow camera and microphone access to record video.";
 			
 		}
-				//livestream is not ok :(
-					livestreamOk = false;
+		//livestream is not ok :(
+		livestreamOk = false;
+		console.log("errorMessage", errorMessage);
 		blackbox[0].innerHTML=errorMessage;
 		 state="stop";
+		 stopStream;
 		
 	});
 }

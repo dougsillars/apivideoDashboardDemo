@@ -45,7 +45,7 @@ if(live){
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
 			var playerUrl = jsonResponse.assets.player;
-			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>. NOTE: This is a low fidelity livestream for testing purposes. Please do not use in production.";
+			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>";
 			console.log("videoId",videoId);
 	
 				
@@ -123,30 +123,22 @@ function radioButton(){
 		document.getElementById("sandboxDiv").className="sandboxActive";
 		document.getElementById("productionDiv").className="production";
 	});
+	//only chage stuff to productionif production is possible
+	if(productionAvailable ==="true"){
+		radioProduction.addEventListener('click', function(){
+		
 	
-		
-		
-	    //only change stuff to productionif production is possible
-	    if(productionAvailable ==="true"){
-			radioProduction.addEventListener('click', function(){
-				document.getElementById("production").checked = "true";
-				console.log("checking prod radio");
-				document.getElementById("vodsandbox").value="false";
-				document.getElementById("livesandbox").value="false";
-				console.log("prod clicked");
+			document.getElementById("production").checked = "true";
+			console.log("checking prod radio");
+			document.getElementById("vodsandbox").value="false";
+			document.getElementById("livesandbox").value="false";
+			console.log("prod clicked");
 
-				document.getElementById("sandboxDiv").className="sandbox";
-				document.getElementById("productionDiv").className="productionActive";
-			});
-		}else{
-			radioProduction.addEventListener('click', function(){
-			//production is not available
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML = "To run this demo in production, you must enter a credit card";
-			});
-		}
+			document.getElementById("sandboxDiv").className="sandbox";
+			document.getElementById("productionDiv").className="productionActive";
 		
-		
-	
+		});
+	}
 }
  
 function dropVideo(){
@@ -161,7 +153,7 @@ function dropVideo(){
 
 	;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
 		dropArea.addEventListener(eventName, preventDefaults, false);
-		console.log("prevented defaults");
+		console.log("prevented defauls");
 	})
 
 	function preventDefaults (e) {
@@ -186,7 +178,21 @@ function dropVideo(){
 		//var upload = document.getElementById('upload');
 		
 		
-	
+		
+		//forminJS.append('username', 'Chris');
+	    //forminJS.append('source', file[0], 'myvideo.mp4');
+		//console.log("forminJSuserbname",forminJS.getAll('username'));
+		//console.log("forminJSfile",forminJS.getAll('source'));
+		//console.log("forminJS", forminJS);
+		
+        //uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
+	    //var fileElement = document.getElementById('file');
+		//fileElement.files[0] = file[0];
+		
+		//console.log("formData2",formData);
+		//console.log("fileelement",fileElement);
+		//console.log("fileelement files",fileElement.files);
+		//uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
         uploadForm.submit("/", method = 'POST',  enctype="multipart/form-data");
 	 
 	  }

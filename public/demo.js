@@ -7,7 +7,7 @@ var framerate = 10;
 var audioBitrate = 11025;
 var width = 240;
 var height = 240;
-var livestreamTimeout = 1000;
+var livestreamTimeout = 15000;
 var livestreamOk = true;
 
 
@@ -79,9 +79,22 @@ if(live){
 				
 				iframeList[1].id = "liveVideoiframe";
 				console.log("iframeList1", iframeList[1]);
-				iframeList[1].contentWindow.location.reload(true);
+				//iframeList[1].contentWindow.location.reload(true);
 				//adding empty space causes iframe to reload
-				document.getElementById("liveVideoiframe").src +=' ';
+				
+				var random = Math.floor(Math.random()*10);
+				console.log(random);
+				document.getElementById("liveVideo").innerHTML = "";
+				window.player = new PlayerSdk("#liveVideo", { 
+					id: videoId, 
+					live: true,
+					autoplay:true,
+					muted:true 
+				});
+				
+				
+				//document.getElementById("liveVideoiframe").src = document.getElementById("liveVideoiframe").src;
+				//document.getElementById("liveVideoiframe").src +='&id='+random;
 				setTimeout(function(){
 					videoRefresh.className = "videoRefresh";
 				  },100);

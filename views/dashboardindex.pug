@@ -13,8 +13,9 @@ body
          | Test out your API
       .action_environment
           #sandboxDiv Sandbox
-          #productionDiv Production
             input(style='display:none' type="radio" name="envir" value='sandbox' id='sandbox' checked="checked" )
+          #productionDiv Production
+            
             input(style='display:none' type="radio" name="envir" value='production' id='production' )        
    .resultRow    
     .resultsWrapper
@@ -23,7 +24,7 @@ body
     .action__upload(id='action__upload')
         
           
-        form(id='upload',name='uploadForm',action='dashboard' ,method = 'POST',  enctype="multipart/form-data")
+        form(id='upload',name='uploadForm',action='/' ,method = 'POST',  enctype="multipart/form-data")
           input(id='vodsandbox',type='text', name = "vodsandbox", value="true",style='display:none')
 
           label(for='file', class="uploadFile")          
@@ -35,12 +36,21 @@ body
            input(id='file',type='file', name="source", class="inputFile", style='display:none', onclick='thisFileUpload();')
      
     .action__live
-        form(name='livestreamForm',action='dashboard' method = 'GET')
+        form(name='livestreamForm',action='/' method = 'GET')
           input(id='livetext',type='text', name = "live", value="true",style='display:none')
           input(id='livesandbox',type='text', name = "livesandbox", value="true",style='display:none')
           span(style="font-size: 18px;") <b>Livestream</b><br/><br/>
           span(class='uploadFile__content__desc') Start live streaming from your webcam (Chrome and Firefox only). <br/><br/>
+          span(class="speed_list")
+            input(type="radio", name="video_size", value="240", checked) 
+            | 240x240 (requires 1MBPS uplink)
+            p
+            input(type="radio", name="video_size", value="720" )
+            | 1280x720 (requires 4 MBPS uplink)
+            p Build <a href='//stream.a.video')>your own</a> up to 4K!
+
           input(type="submit", class="liveButton" name="livestream", value ='Start' onclick='initiateLivestream();')
+        #live_disclaimer 
 
   #liveTest
   #Livestream

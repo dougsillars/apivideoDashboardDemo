@@ -5,8 +5,12 @@ const live = urlParams.get('live');
 console.log("live?",live);
 var framerate = 10;
 var audioBitrate = 11025;
+var height = Math.max(240, urlParams.get('video_size'));
 var width = 240;
-var height = 240;
+if(height == 720){
+	width = 1280;
+}
+console.log("width x height", width + "x"+height);
 var livestreamTimeout = 15000;
 var livestreamOk = true;
 
@@ -45,7 +49,7 @@ if(live){
 			var jsonResponse = JSON.parse(liveResponse);
 			var videoId = jsonResponse.liveStreamId;
 			var playerUrl = jsonResponse.assets.player;
-			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>. NOTE: This is a low fidelity livestream for testing purposes. Please do not use in production.";
+			var responseString = "<a href='"+playerUrl+"#autoplay' target='_blank'>Your livestream is ready to view!</a>. NOTE: This is a low fidelity livestream for testing purposes. Build your own live video player.";
 			console.log("videoId",videoId);
 	
 				
@@ -69,8 +73,22 @@ if(live){
 	
 	//not live
 	window.onload = function(){
+		//nable sandbox
 		
-
+		/*
+		//document.getElementById("sandboxDiv").className="sandboxActive";
+		//
+		console.log("productionAvailable",productionAvailable);
+		if(productionAvailable ==="false"){
+			//disable the prodction radio button
+			document.getElementById("production").disabled = "true";
+			document.getElementById("live_disclaimer").style.display = "none";
+			document.getElementsByClassName("production")[0].style.color = "gray";
+		}else{
+			
+			document.getElementById("productionDiv").className="productionActive";
+		}
+*/
 		radioButton();
    		dropVideo();
 	}
@@ -107,7 +125,10 @@ function radioButton(){
 		//disable the prodction radio button
 		document.getElementById("production").disabled = "true";
 		document.getElementsByClassName("production")[0].style.color = "gray";
-	}
+	}else{
+			
+			document.getElementById("productionDiv").className="productionActive";
+		}
 	
 	//now - what if the default was overridden by the user
 	
@@ -119,6 +140,7 @@ function radioButton(){
 		document.getElementById("vodsandbox").value="true";
 		document.getElementById("livesandbox").value="true";
 		console.log("sandbox clicked");
+		document.getElementById("live_disclaimer").style.display = "none";
 
 		document.getElementById("sandboxDiv").className="sandboxActive";
 		document.getElementById("productionDiv").className="production";
@@ -137,11 +159,13 @@ function radioButton(){
 
 				document.getElementById("sandboxDiv").className="sandbox";
 				document.getElementById("productionDiv").className="productionActive";
+				document.getElementById("live_disclaimer").style.display = "inherit";
 			});
 		}else{
 			radioProduction.addEventListener('click', function(){
 			//production is not available
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML = "To run this demo in production, you must enter a credit card";
+				document.getElementsByClassName("resultsWrapper")[0].style.color="red";
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML = "To test your API in production, you must enter a credit card";
 			});
 		}
 		
@@ -192,12 +216,6 @@ function dropVideo(){
 	  }
   }
 		
-	
-	
-	
-
-
-
 
  
  function thisFileUpload() {
@@ -215,8 +233,34 @@ function dropVideo(){
 	console.log('done');
 };
 
+
+function uploadVideo(form){
+	var oReq = new XMLHttpRequest();
+	oReq.upload.addEventListener("progress", updateProgress);	
+	oReq.open("POST", url, true);
+	function updateProgress (oEvent) {
+		//do stuff
+	}
+	oReq.onload = function (oEvent) {
+	               // Uploaded//update the resoinse bar with the url of the response.
+		console.log("all uploaded");
+		var resp = JSON.parse(oReq.response);
+		var videoURl = resp.assets.player;
+		
+					
+	  };
+	  oReq.send(chunkForm);
+	
+	
+}
+
+
+
  function initiateLivestream() {
-	 //set up livestream
+	//resize the video
+
+	
+	//set up livestream
 	 //warm up the camera
 	 connect_server();
 	
@@ -277,12 +321,14 @@ function show_output(str){
 		socket.on('connect_timeout', (timeout) => {
    			console.log("state on connection timeout= " +timeout);
 			output_message.innerHTML="Connection timed out";
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="Connection timed out";
 			//recordingCircle.style.fill='gray';
 			
 		});
 		socket.on('error', (error) => {
    			console.log("state on connection error= " +error);
 			output_message.innerHTML="Connection error";
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="Connection error";
 		//	recordingCircle.style.fill='gray';
 		});
 		
@@ -290,6 +336,7 @@ function show_output(str){
    			console.log("state on connection error= " +state);
 			console.log("Connection Failed");
 			output_message.innerHTML="Connection Failed";
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="Connection Failed";
 		//	recordingCircle.style.fill='gray';
 		});
 
@@ -303,6 +350,7 @@ function show_output(str){
 		socket.on('fatal',function(m){
 
 			output_message.innerHTML+=('Fatal ERROR: unexpected:'+m);
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="FFMPeg Crashed. Try starting the livestream again - maybe at lower bitrate.";
 			//alert('Error:'+m);
 			console.log("fatal socket error!!", m);
 			console.log("state on fatal error= " +state);
@@ -327,10 +375,12 @@ function show_output(str){
 			console.log("state disconec= " +state);
 			output_message.innerHTML+=('ERROR: server disconnected!');
 			console.log('ERROR: server disconnected!' +reason);
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="FFMPeg disconnected. Try starting the livestream again - maybe at lower bitrate.";
+			
 			
 			//error message to users
 			//document.getElementsByClassName("resultsWrapper")[0].innerHTML
-			document.getElementsByClassName("resultsWrapper")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later.";
+			document.getElementsByClassName("resultsWrapper")[0].innerHTML="This demo requires a steady internet connection with a fast upload rate. Please try again later, or at a lower bitrate.";
 					
 	
 		});
